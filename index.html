@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>PL/0 Compiler Visualization</title>
+    <style>
+        body { font-family: sans-serif; display: flex; gap: 20px; padding: 20px; }
+        .panel { flex: 1; border: 1px solid #ccc; padding: 10px; height: 90vh; overflow: auto; }
+        h2 { border-bottom: 2px solid #333; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 4px; font-size: 12px; }
+        th { background-color: #f2f2f2; }
+        .error { color: red; font-weight: bold; }
+        .node { margin-left: 20px; border-left: 1px solid #999; padding-left: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="panel">
+    <h2>1. 单词表 (Token List)</h2>
+    <table id="tokenTable">
+        <thead><tr><th>ID</th><th>Line</th><th>Type</th><th>Value</th></tr></thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <h2>2. 语法分析树 (AST)</h2>
+    <div id="astView"></div>
+</div>
+
+<div class="panel">
+    <h2>3. 中间代码 (TAC)</h2>
+    <table id="tacTable">
+        <thead><tr><th>ID</th><th>Op</th><th>Arg1</th><th>Arg2</th><th>Result</th></tr></thead>
+        <tbody></tbody>
+    </table>
+    
+    <h2 class="error">4. 错误信息</h2>
+    <ul id="errorList" class="error"></ul>
+</div>
+
+<script>
+    fetch('output.json')
+        .then(response => response.json())
+        .then(data => {
+            // Render Tokens
+            const tokenBody = document.querySelector('#tokenTable tbody');
+            data.tokens.forEach(t => {
+                tokenBody.innerHTML += `<tr><td>${t.id}</td><td>${t.line}</td><td>${t.type}</td><td>${t.value}</td></tr>`;
+            });
+
+            // Render TAC
+            const tacBody = document.querySelector('#tacTable tbody');
+            data.tac.forEach(q => {
+                tacBody.innerHTML += `<tr><td>${q.id}</td><td>${q.op}</td><td>${q.arg1}</td><td>${q.arg2}</td><td>${q.result}</td></tr>`;
+            });
+
+            // Render Errors
+            const errList = document.getElementById('errorList');
+            data.errors.forEach(e => {
+                errList.innerHTML += `<li>Line ${e.line}: Code ${e.code} - ${e.msg}</li>`;
+            });
+
+            // Render AST
+            const astView = document.getElementById('astView');
+            function renderNode(node) {
+                if(!node) return '';
+                let html = `<div class="node"><strong>${node.type}</strong> <span style="color:blue">${node.info}</span>`;
+                if(node.children) {
+                    node.children.forEach(child => {
+                        html += renderNode(child);
+                    });
+                }
+                html += `</div>`;
+                return html;
+            }
+            astView.innerHTML = renderNode(data.ast);
+        })
+        .catch(err => console.error("Error loading JSON:", err));
+</script>
+</body>
+</html>
