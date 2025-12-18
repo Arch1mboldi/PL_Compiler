@@ -428,7 +428,6 @@ public:
         }
         else if (match(T_WHILE)) {
             node = new ASTNode("Stmt", "While");
-            advance(); // 消耗 'while'
 
             // 1. 创建循环用的标签
             string startLabel = newLabel(); // 循环开始的标签 (e.g., L4)
@@ -482,7 +481,6 @@ public:
         }
         else if (match(T_EXIT)) {
             node = new ASTNode("Stmt", "Exit");
-            advance(); // 消耗 'exit' token
 
             if (loopExitLabels.empty()) {
                 error(0, "EXIT statement not within a loop.");
