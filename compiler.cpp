@@ -135,38 +135,58 @@ public:
             }
             else {
                 // 符号
-                string buf;
-                buf += ch;
-                pos++;
-                
-                if (ch == ':' && src[pos] == '=') { buf += "="; pos++; addToken(T_ASSIGN, buf); }
-                else if (ch == '>' && src[pos] == '=') { buf += "="; pos++; addToken(T_GE, buf); }
-                else if (ch == '<') {
-                    if (src[pos] == '=') { buf += "="; pos++; addToken(T_LE, buf); }
-                    else if (src[pos] == '>') { buf += ">"; pos++; addToken(T_NEQ, buf); }
-                    else addToken(T_LT, buf);
-                }
-                else if (ch == '.' && src[pos] == '.') { buf += "."; pos++; addToken(T_DOTDOT, buf); }
-                else {
-                    switch(ch) {
-                        case '+': addToken(T_PLUS, "+"); break;
-                        case '-': addToken(T_MINUS, "-"); break;
-                        case '*': addToken(T_MUL, "*"); break;
-                        case '/': addToken(T_SLASH, "/"); break;
-                        case '=': addToken(T_EQ, "="); break;
-                        case '>': addToken(T_GT, ">"); break;
-                        case '(': addToken(T_LPAREN, "("); break;
-                        case ')': addToken(T_RPAREN, ")"); break;
-                        case '[': addToken(T_LBRACKET, "["); break;
-                        case ']': addToken(T_RBRACKET, "]"); break;
-                        case ',': addToken(T_COMMA, ","); break;
-                        case ';': addToken(T_SEMICOLON, ";"); break;
-                        case '.': addToken(T_PERIOD, "."); break;
-                        case ':': addToken(T_COLON, ":"); break;
-                        default: 
-                            // 错误：非法字符，暂略
-                            break;
-                    }
+                pos++; // 先将 pos 前进一位
+                switch (ch) {
+                    case ':':
+                        if (pos < src.length() && src[pos] == '=') {
+                            pos++;
+                            addToken(T_ASSIGN, ":=");
+                        } else {
+                            addToken(T_COLON, ":");
+                        }
+                        break;
+                    case '<':
+                        if (pos < src.length() && src[pos] == '=') {
+                            pos++;
+                            addToken(T_LE, "<=");
+                        } else if (pos < src.length() && src[pos] == '>') {
+                            pos++;
+                            addToken(T_NEQ, "<>");
+                        } else {
+                            addToken(T_LT, "<");
+                        }
+                        break;
+                    case '>':
+                        if (pos < src.length() && src[pos] == '=') {
+                            pos++;
+                            addToken(T_GE, ">=");
+                        } else {
+                            addToken(T_GT, ">");
+                        }
+                        break;
+                    case '.':
+                        if (pos < src.length() && src[pos] == '.') {
+                            pos++;
+                            addToken(T_DOTDOT, "..");
+                        } else {
+                            addToken(T_PERIOD, ".");
+                        }
+                        break;
+                    // 其他单字符符号
+                    case '+': addToken(T_PLUS, "+"); break;
+                    case '-': addToken(T_MINUS, "-"); break;
+                    case '*': addToken(T_MUL, "*"); break;
+                    case '/': addToken(T_SLASH, "/"); break;
+                    case '=': addToken(T_EQ, "="); break;
+                    case '(': addToken(T_LPAREN, "("); break;
+                    case ')': addToken(T_RPAREN, ")"); break;
+                    case '[': addToken(T_LBRACKET, "["); break;
+                    case ']': addToken(T_RBRACKET, "]"); break;
+                    case ',': addToken(T_COMMA, ","); break;
+                    case ';': addToken(T_SEMICOLON, ";"); break;
+                    default:
+                        // 错误：非法字符，暂略
+                        break;
                 }
             }
         }
