@@ -732,77 +732,141 @@ public:
 // ==========================================
 // 5. JSON 输出与 主程序
 // ==========================================
-
-void dumpJSON(const vector<Token>& tokens, ASTNode* ast, const vector<Quadruple>& quads, const vector<Error>& errs) {
-    ofstream out("output.json");
-    out << "{\n";
+string escapeJsonString(const string& input) {
+    stringstream ss;
+    for (char c : input) {
+        switch (c) {
+            case '"':  ss << "\\\""; break;
+            case '\\': ss << "\\\\"; break;
+            case '\b': ss << "\\b";  break;
+            case '\f': ss << "\\f";  break;
+            case '\n': ss << "\\n";  break;
+            case '\r': ss << "\\r";  break;
+            case '\t': ss << "\\t";  break;
+            default:   ss << c;      break;
+        }
+    }
+    return ss.str();
+}
+string getCompilationResultAsJson(    const string& filename, 
+    const string& source,  // <--- 新增参数: 源代码
+    const vector<Token>& tokens, 
+    ASTNode* ast, 
+    const vector<Quadruple>& quads, 
+    const vector<Error>& errs) {
+    stringstream ss;
+    ss << "{\n";
     
+    // 添加文件名信息
+    ss << "  \"filename\": \"" << filename << "\",\n";
+    ss << "  \"source\": \"" << escapeJsonString(source) << "\",\n";
     // Tokens
-    out << "  \"tokens\": [\n";
+    ss << "  \"tokens\": [\n";
     for(size_t i=0; i<tokens.size(); ++i) {
-        out << "    {\"id\": " << tokens[i].id << ", \"line\": " << tokens[i].line 
+        ss << "    {\"id\": " << tokens[i].id << ", \"line\": " << tokens[i].line 
             << ", \"type\": " << tokens[i].type << ", \"value\": \"" << tokens[i].value << "\"}" 
             << (i < tokens.size()-1 ? "," : "") << "\n";
     }
-    out << "  ],\n";
+    ss << "  ],\n";
 
     // Errors
-    out << "  \"errors\": [\n";
+    ss << "  \"errors\": [\n";
     for(size_t i=0; i<errs.size(); ++i) {
-        out << "    {\"code\": " << errs[i].code << ", \"line\": " << errs[i].line 
+        ss << "    {\"code\": " << errs[i].code << ", \"line\": " << errs[i].line 
             << ", \"msg\": \"" << errs[i].msg << "\"}" 
             << (i < errs.size()-1 ? "," : "") << "\n";
     }
-    out << "  ],\n";
+    ss << "  ],\n";
 
     // TAC
-    out << "  \"tac\": [\n";
+    ss << "  \"tac\": [\n";
     for(size_t i=0; i<quads.size(); ++i) {
-        out << "    {\"id\": " << quads[i].id << ", \"op\": \"" << quads[i].op 
+        ss << "    {\"id\": " << quads[i].id << ", \"op\": \"" << quads[i].op 
             << "\", \"arg1\": \"" << quads[i].arg1 << "\", \"arg2\": \"" << quads[i].arg2 
             << "\", \"result\": \"" << quads[i].result << "\"}" 
             << (i < quads.size()-1 ? "," : "") << "\n";
     }
-    out << "  ],\n";
+    ss << "  ],\n";
 
-    // AST (Simple recursive dump)
-    out << "  \"ast\": ";
+    // AST
+    ss << "  \"ast\": ";
     function<void(ASTNode*)> printNode = [&](ASTNode* node) {
-        if (!node) { out << "null"; return; }
-        out << "{\"id\": " << node->id << ", \"type\": \"" << node->type << "\", \"info\": \"" << node->info << "\", \"children\": [";
+        if (!node) { ss << "null"; return; }
+        ss << "{\"id\": " << node->id << ", \"type\": \"" << node->type << "\", \"info\": \"" << node->info << "\", \"children\": [";
         for(size_t i=0; i<node->children.size(); ++i) {
             printNode(node->children[i]);
-            if(i < node->children.size()-1) out << ",";
+            if(i < node->children.size()-1) ss << ",";
         }
-        out << "]}";
+        ss << "]}";
     };
     printNode(ast);
-    out << "\n}";
-    out.close();
-    cout << "Compilation finished. Result saved to output.json" << endl;
+    ss << "\n}";
+
+    return ss.str();
 }
 
-int main() {
-    // 读取 test.pl
-    ifstream file("test.pl");
-    if (!file.is_open()) {
-        cerr << "Error: Cannot open test.pl" << endl;
+
+int main(int argc, char* argv[]) {
+    vector<string> filesToCompile;
+
+    if (argc == 1) {
+        // 默认编译所有 test0.pl 到 test9.pl
+        for (int i = 0; i <= 9; i++) {
+            filesToCompile.push_back("test" + to_string(i) + ".pl");
+        }
+    } else {
+        // 编译命令行指定的文件
+        for (int i = 1; i < argc; ++i) {
+            filesToCompile.push_back(argv[i]);
+        }
+    }
+
+    ofstream outFile("output.json");
+    if (!outFile.is_open()) {
+        cerr << "Error: Cannot create output.json" << endl;
         return 1;
     }
-    stringstream buffer;
-    buffer << file.rdbuf();
-    string source = buffer.str();
 
-    // 1. 词法分析
-    Lexer lexer(source);
-    lexer.scan();
+    outFile << "{\n"; // JSON文件的开始
 
-    // 2. 语法分析 & 中间代码生成
-    Parser parser(lexer.tokens);
-    parser.parse();
+    for (size_t i = 0; i < filesToCompile.size(); ++i) {
+        const string& filename = filesToCompile[i];
+        
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cerr << "Error: Cannot open " << filename << endl;
+            continue; // 跳过这个文件
+        }
+        cout << "Compiling " << filename << "..." << endl;
+        
+        stringstream buffer;
+        buffer << file.rdbuf();
+        string source = buffer.str();
 
-    // 3. 输出 JSON
-    dumpJSON(lexer.tokens, parser.root, parser.getQuads(), parser.getErrors());
+        // 1. 词法分析
+        Lexer lexer(source);
+        lexer.scan();
+
+        // 2. 语法分析 & 中间代码生成
+        Parser parser(lexer.tokens);
+        parser.parse();
+
+        // 3. 获取该文件的JSON结果字符串
+        string resultJson = getCompilationResultAsJson(filename,source, lexer.tokens, parser.root, parser.getQuads(), parser.getErrors());
+
+        // 4. 将结果写入大的JSON对象
+        outFile << "  \"" << filename << "\": " << resultJson;
+
+        // 如果不是最后一个文件，添加逗号
+        if (i < filesToCompile.size() - 1) {
+            outFile << ",\n";
+        }
+    }
+
+    outFile << "\n}\n"; // JSON文件的结束
+    outFile.close();
+
+    cout << "Compilation finished. All results saved to output.json" << endl;
 
     return 0;
 }
