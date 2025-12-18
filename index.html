@@ -172,15 +172,34 @@
         }
 
         #source-code {
-            white-space: pre-wrap;
+            counter-reset: line;
+            white-space: pre;
             font-family: 'Courier New', Courier, monospace;
             background-color: #fdf6e3; /* Solarized Light theme */
             color: #657b83;
             padding: 15px;
+            padding-left: 50px;
             border-radius: 5px;
             line-height: 1.5;
+            position: relative;
         }
-        
+
+        #source-code span {
+            display: block;
+        }
+
+        #source-code span::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 15px;
+            width: 30px;
+            text-align: right;
+            color: #93a1a1;
+            font-weight: normal;
+            user-select: none;
+        }
+                
         table.results-table {
             width: 100%;
             border-collapse: collapse;
@@ -440,10 +459,12 @@
     function renderData(data) {
         clearTables();
         
-        // 渲染源代码
+        // 渲染源代码（带行号）
         const sourceCodeEl = document.getElementById('source-code');
         if (data.source) {
-            sourceCodeEl.textContent = data.source;
+            // 将源代码按行分割，并用 span 包装每行以支持 CSS 计数器
+            const lines = data.source.split('\n');
+            sourceCodeEl.innerHTML = lines.map(line => `<span>${line}</span>`).join('');
         } else {
             sourceCodeEl.textContent = '未找到源代码。';
         }
