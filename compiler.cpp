@@ -88,7 +88,6 @@ public:
         keywords["mod"] = T_MOD; keywords["and"] = T_AND;
         keywords["or"] = T_OR; keywords["not"] = T_NOT;
         keywords["odd"] = T_ODD;
-        
     }
 
     void scan() {
@@ -132,6 +131,17 @@ public:
                     }
                 }
                 addToken(T_NUMBER, buf);
+            }
+            // [FIX 1] 添加字符串字面量的处理
+            else if (ch == '\'') {
+                string buf;
+                pos++; // 跳过开头的 '
+                while (pos < src.length() && src[pos] != '\'') {
+                    if (src[pos] == '\n') line++; // 支持多行字符串
+                    buf += src[pos++];
+                }
+                if (pos < src.length()) pos++; // 跳过结尾的 '
+                addToken(T_STRING, buf);
             }
             else {
                 // 符号
@@ -403,6 +413,25 @@ public:
             emit(":=", exprRes, "", id); // 生成赋值三地址码
             node->info = "Assign";
         }
+        // [FIX 3] 增加 CALL 语句的处理
+        else if (match(T_CALL)) {
+            node->info = "Call";
+            string name = peek().value;
+            expect(T_IDENT, 14); // Expected identifier
+            int argCount = 0;
+            // 处理参数
+            if (match(T_LPAREN)) {
+                if (peek().type != T_RPAREN) {
+                    do {
+                        string arg = parseExp()->info;
+                        emit("param", "", "", arg);
+                        argCount++;
+                    } while (match(T_COMMA));
+                }
+                expect(T_RPAREN, 22);
+            }
+            emit("call", name, to_string(argCount), "");
+        }
         else if (match(T_IF)) {
             node->info = "If";
             string cond = parseExp()->info;
@@ -481,9 +510,9 @@ public:
         }
         else if (match(T_EXIT)) {
             node = new ASTNode("Stmt", "Exit");
-
             if (loopExitLabels.empty()) {
                 error(0, "EXIT statement not within a loop.");
+                //emit("halt", "", "", ""); 
             } else {
                 // 生成跳转指令，跳转到当前循环的出口标签
                 emit("j", "", "", loopExitLabels.top());
@@ -505,8 +534,6 @@ public:
             string new_ref = newTemp(); // 新的临时变量存储地址或值
             
             // 生成计算数组元素地址的TAC
-            // 这需要符号表信息来获取数组的基地址和元素大小
-            // 这里简化为伪指令 "array_access"
             emit("array_access", temp_base, temp_index, new_ref);
 
             current_ref = new_ref;
@@ -563,6 +590,14 @@ public:
                 node->info = place;
                 advance();
                 break;
+            
+            // [FIX 2] 增加字符串因子的处理 (支持 write('str'))
+            case T_STRING:
+                // 将字符串包装在单引号中，以便后端/解释器识别为字符串字面量
+                place = "'" + peek().value + "'";
+                node->info = place;
+                advance();
+                break;
 
             case T_LPAREN:
                 match(T_LPAREN);
@@ -606,14 +641,6 @@ public:
                 advance(); // 消耗 'exit' token
 
                 // TAC Generation for exit
-                // 'exit' 需要跳转到当前循环的出口标签
-                // 我们需要一个机制来获取这个标签
-                if (loopExitLabels.empty()) {
-                    error(0, "EXIT statement not within a loop.");
-                } else {
-                    emit("j", "", "", loopExitLabels.top());
-                }
-                break;
             }
 
             default:
