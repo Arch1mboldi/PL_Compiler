@@ -85,7 +85,7 @@
     {"id": 20, "op": "write", "arg1": "", "arg2": "", "result": "0"},
     {"id": 21, "op": "label", "arg1": "", "arg2": "", "result": "L6"}
   ],
-  "ast": {"id": 1, "type": "Program", "info": "", "children": [{"id": 2, "type": "Block", "info": "", "children": [{"id": 3, "type": "VarDecls", "info": "", "children": []},{"id": 4, "type": "Stmt", "info": "Assign", "children": []},{"id": 8, "type": "Stmt", "info": "Assign", "children": []},{"id": 12, "type": "Stmt", "info": "If", "children": [{"id": 20, "type": "Stmt", "info": "Assign", "children": []},{"id": 24, "type": "Stmt", "info": "Assign", "children": []}]},{"id": 28, "type": "Stmt", "info": "Write", "children": []},{"id": 32, "type": "Stmt", "info": "If", "children": [{"id": 40, "type": "Stmt", "info": "Write", "children": []},{"id": 44, "type": "Stmt", "info": "Write", "children": []}]}]}]}
+  "ast": {"id": 1, "type": "Program", "info": "", "children": [{"id": 2, "type": "Block", "info": "", "children": [{"id": 3, "type": "VarDecls", "info": "", "children": []},{"id": 4, "type": "Stmt", "info": "Assign", "children": []},{"id": 6, "type": "Stmt", "info": "Assign", "children": []},{"id": 8, "type": "Stmt", "info": "If", "children": [{"id": 12, "type": "Stmt", "info": "Assign", "children": []},{"id": 14, "type": "Stmt", "info": "Assign", "children": []}]},{"id": 16, "type": "Stmt", "info": "Write", "children": []},{"id": 18, "type": "Stmt", "info": "If", "children": [{"id": 22, "type": "Stmt", "info": "Write", "children": []},{"id": 24, "type": "Stmt", "info": "Write", "children": []}]}]}]}
 },
   "test1.pl": {
   "filename": "test1.pl",
@@ -155,7 +155,7 @@
     {"id": 15, "op": "label", "arg1": "", "arg2": "", "result": "L2"},
     {"id": 16, "op": "write", "arg1": "", "arg2": "", "result": "999"}
   ],
-  "ast": {"id": 48, "type": "Program", "info": "", "children": [{"id": 49, "type": "Block", "info": "", "children": [{"id": 50, "type": "VarDecls", "info": "", "children": []},{"id": 51, "type": "Stmt", "info": "Assign", "children": []},{"id": 56, "type": "Stmt", "info": "While", "children": [{"id": 57, "type": "Expression", "info": "t1", "children": [{"id": 60, "type": "RelOp", "info": "<=", "children": [{"id": 58, "type": "Term", "info": "i", "children": [{"id": 59, "type": "IdentRef", "info": "i", "children": []}]},{"id": 61, "type": "Expression", "info": "10", "children": [{"id": 62, "type": "Term", "info": "10", "children": [{"id": 63, "type": "Factor", "info": "10", "children": []}]}]}]}]},{"id": 64, "type": "Stmt", "info": "Compound", "children": [{"id": 65, "type": "Stmt", "info": "If", "children": [{"id": 74, "type": "Stmt", "info": "Exit", "children": []}]},{"id": 75, "type": "Stmt", "info": "Write", "children": []},{"id": 79, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 86, "type": "Stmt", "info": "Write", "children": []}]}]}
+  "ast": {"id": 26, "type": "Program", "info": "", "children": [{"id": 27, "type": "Block", "info": "", "children": [{"id": 28, "type": "VarDecls", "info": "", "children": []},{"id": 29, "type": "Stmt", "info": "Assign", "children": []},{"id": 31, "type": "Stmt", "info": "While", "children": [{"id": 35, "type": "Stmt", "info": "Compound", "children": [{"id": 36, "type": "Stmt", "info": "If", "children": [{"id": 40, "type": "Stmt", "info": "Exit", "children": []}]},{"id": 41, "type": "Stmt", "info": "Write", "children": []},{"id": 43, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 47, "type": "Stmt", "info": "Write", "children": []}]}]}
 },
   "test2.pl": {
   "filename": "test2.pl",
@@ -227,11 +227,11 @@
     {"id": 10, "op": "write", "arg1": "", "arg2": "", "result": "y"},
     {"id": 11, "op": "write", "arg1": "", "arg2": "", "result": "42"}
   ],
-  "ast": {"id": 90, "type": "Program", "info": "", "children": [{"id": 91, "type": "Block", "info": "", "children": [{"id": 92, "type": "VarDecls", "info": "", "children": []},{"id": 93, "type": "Stmt", "info": "Assign", "children": []},{"id": 97, "type": "Stmt", "info": "Assign", "children": []},{"id": 101, "type": "Stmt", "info": "Assign", "children": []},{"id": 108, "type": "Stmt", "info": "Write", "children": []},{"id": 115, "type": "Stmt", "info": "Write", "children": []},{"id": 128, "type": "Stmt", "info": "Write", "children": []}]}]}
+  "ast": {"id": 49, "type": "Program", "info": "", "children": [{"id": 50, "type": "Block", "info": "", "children": [{"id": 51, "type": "VarDecls", "info": "", "children": []},{"id": 52, "type": "Stmt", "info": "Assign", "children": []},{"id": 54, "type": "Stmt", "info": "Assign", "children": []},{"id": 56, "type": "Stmt", "info": "Assign", "children": []},{"id": 60, "type": "Stmt", "info": "Write", "children": []},{"id": 63, "type": "Stmt", "info": "Write", "children": []},{"id": 68, "type": "Stmt", "info": "Write", "children": []}]}]}
 },
   "test3.pl": {
   "filename": "test3.pl",
-  "source": "/* Test boolean types and operations */\nprogram\n    var a, b, c : boolean;\n        x, y : integer;\nbegin\n    a := true;\n    b := false;\n    x := 5;\n    y := 10;\n    \n    c := a and b;\n    write(c);  /* false */\n    \n    c := a or b;\n    write(c);  /* true */\n    \n    c := not a;\n    write(c);  /* false */\n    \n    c := x > y;\n    write(c);  /* false */\n    \n    c := x < y and a;\n    write(c)   /* true */\nend.\n",
+  "source": "/* Test boolean types and operations */\nprogram\n    var a, b, c : boolean;\n        x, y : integer;\nbegin\n    a := true;\n    b := false;\n    x := 5;\n    y := 10;\n    \n    c := a and b;\n    write(c);  /* false */\n    \n    c := a or b;\n    write(c);  /* true */\n    \n    c := not a;\n    write(c);  /* false */\n    \n    c := x > y;\n    write(c);  /* false */\n\nend.\n",
   "tokens": [
     {"id": 1, "line": 2, "type": 4, "value": "program"},
     {"id": 2, "line": 3, "type": 6, "value": "var"},
@@ -309,49 +309,31 @@
     {"id": 74, "line": 21, "type": 1, "value": "c"},
     {"id": 75, "line": 21, "type": 45, "value": ")"},
     {"id": 76, "line": 21, "type": 49, "value": ";"},
-    {"id": 77, "line": 23, "type": 1, "value": "c"},
-    {"id": 78, "line": 23, "type": 51, "value": ":="},
-    {"id": 79, "line": 23, "type": 1, "value": "x"},
-    {"id": 80, "line": 23, "type": 40, "value": "<"},
-    {"id": 81, "line": 23, "type": 1, "value": "y"},
-    {"id": 82, "line": 23, "type": 25, "value": "and"},
-    {"id": 83, "line": 23, "type": 1, "value": "a"},
-    {"id": 84, "line": 23, "type": 49, "value": ";"},
-    {"id": 85, "line": 24, "type": 18, "value": "write"},
-    {"id": 86, "line": 24, "type": 44, "value": "("},
-    {"id": 87, "line": 24, "type": 1, "value": "c"},
-    {"id": 88, "line": 24, "type": 45, "value": ")"},
-    {"id": 89, "line": 25, "type": 10, "value": "end"},
-    {"id": 90, "line": 25, "type": 50, "value": "."},
-    {"id": 91, "line": 26, "type": 54, "value": "EOF"}
+    {"id": 77, "line": 23, "type": 10, "value": "end"},
+    {"id": 78, "line": 23, "type": 50, "value": "."},
+    {"id": 79, "line": 24, "type": 54, "value": "EOF"}
   ],
   "errors": [
   ],
   "tac": [
-    {"id": 1, "op": "=", "arg1": "1", "arg2": "", "result": "1"},
-    {"id": 2, "op": ":=", "arg1": "1", "arg2": "", "result": "a"},
-    {"id": 3, "op": "=", "arg1": "0", "arg2": "", "result": "0"},
-    {"id": 4, "op": ":=", "arg1": "0", "arg2": "", "result": "b"},
-    {"id": 5, "op": ":=", "arg1": "5", "arg2": "", "result": "x"},
-    {"id": 6, "op": ":=", "arg1": "10", "arg2": "", "result": "y"},
-    {"id": 7, "op": "and", "arg1": "a", "arg2": "b", "result": "t1"},
-    {"id": 8, "op": ":=", "arg1": "t1", "arg2": "", "result": "c"},
-    {"id": 9, "op": "write", "arg1": "", "arg2": "", "result": "c"},
-    {"id": 10, "op": "or", "arg1": "a", "arg2": "b", "result": "t2"},
-    {"id": 11, "op": ":=", "arg1": "t2", "arg2": "", "result": "c"},
-    {"id": 12, "op": "write", "arg1": "", "arg2": "", "result": "c"},
-    {"id": 13, "op": "not", "arg1": "a", "arg2": "", "result": "t3"},
-    {"id": 14, "op": ":=", "arg1": "t3", "arg2": "", "result": "c"},
-    {"id": 15, "op": "write", "arg1": "", "arg2": "", "result": "c"},
-    {"id": 16, "op": ">", "arg1": "x", "arg2": "y", "result": "t4"},
-    {"id": 17, "op": ":=", "arg1": "t4", "arg2": "", "result": "c"},
-    {"id": 18, "op": "write", "arg1": "", "arg2": "", "result": "c"},
-    {"id": 19, "op": "and", "arg1": "y", "arg2": "a", "result": "t5"},
-    {"id": 20, "op": "<", "arg1": "x", "arg2": "t5", "result": "t6"},
-    {"id": 21, "op": ":=", "arg1": "t6", "arg2": "", "result": "c"},
-    {"id": 22, "op": "write", "arg1": "", "arg2": "", "result": "c"}
+    {"id": 1, "op": ":=", "arg1": "1", "arg2": "", "result": "a"},
+    {"id": 2, "op": ":=", "arg1": "0", "arg2": "", "result": "b"},
+    {"id": 3, "op": ":=", "arg1": "5", "arg2": "", "result": "x"},
+    {"id": 4, "op": ":=", "arg1": "10", "arg2": "", "result": "y"},
+    {"id": 5, "op": "and", "arg1": "a", "arg2": "b", "result": "t1"},
+    {"id": 6, "op": ":=", "arg1": "t1", "arg2": "", "result": "c"},
+    {"id": 7, "op": "write", "arg1": "", "arg2": "", "result": "c"},
+    {"id": 8, "op": "or", "arg1": "a", "arg2": "b", "result": "t2"},
+    {"id": 9, "op": ":=", "arg1": "t2", "arg2": "", "result": "c"},
+    {"id": 10, "op": "write", "arg1": "", "arg2": "", "result": "c"},
+    {"id": 11, "op": "not", "arg1": "a", "arg2": "", "result": "t3"},
+    {"id": 12, "op": ":=", "arg1": "t3", "arg2": "", "result": "c"},
+    {"id": 13, "op": "write", "arg1": "", "arg2": "", "result": "c"},
+    {"id": 14, "op": ">", "arg1": "x", "arg2": "y", "result": "t4"},
+    {"id": 15, "op": ":=", "arg1": "t4", "arg2": "", "result": "c"},
+    {"id": 16, "op": "write", "arg1": "", "arg2": "", "result": "c"}
   ],
-  "ast": {"id": 132, "type": "Program", "info": "", "children": [{"id": 133, "type": "Block", "info": "", "children": [{"id": 134, "type": "VarDecls", "info": "", "children": []},{"id": 135, "type": "Stmt", "info": "Assign", "children": []},{"id": 139, "type": "Stmt", "info": "Assign", "children": []},{"id": 143, "type": "Stmt", "info": "Assign", "children": []},{"id": 147, "type": "Stmt", "info": "Assign", "children": []},{"id": 151, "type": "Stmt", "info": "Assign", "children": []},{"id": 157, "type": "Stmt", "info": "Write", "children": []},{"id": 161, "type": "Stmt", "info": "Assign", "children": []},{"id": 168, "type": "Stmt", "info": "Write", "children": []},{"id": 172, "type": "Stmt", "info": "Assign", "children": []},{"id": 177, "type": "Stmt", "info": "Write", "children": []},{"id": 181, "type": "Stmt", "info": "Assign", "children": []},{"id": 189, "type": "Stmt", "info": "Write", "children": []},{"id": 193, "type": "Stmt", "info": "Assign", "children": []},{"id": 203, "type": "Stmt", "info": "Write", "children": []}]}]}
+  "ast": {"id": 70, "type": "Program", "info": "", "children": [{"id": 71, "type": "Block", "info": "", "children": [{"id": 72, "type": "VarDecls", "info": "", "children": []},{"id": 73, "type": "Stmt", "info": "Assign", "children": []},{"id": 75, "type": "Stmt", "info": "Assign", "children": []},{"id": 77, "type": "Stmt", "info": "Assign", "children": []},{"id": 79, "type": "Stmt", "info": "Assign", "children": []},{"id": 81, "type": "Stmt", "info": "Assign", "children": []},{"id": 85, "type": "Stmt", "info": "Write", "children": []},{"id": 87, "type": "Stmt", "info": "Assign", "children": []},{"id": 91, "type": "Stmt", "info": "Write", "children": []},{"id": 93, "type": "Stmt", "info": "Assign", "children": []},{"id": 96, "type": "Stmt", "info": "Write", "children": []},{"id": 98, "type": "Stmt", "info": "Assign", "children": []},{"id": 102, "type": "Stmt", "info": "Write", "children": []}]}]}
 },
   "test4.pl": {
   "filename": "test4.pl",
@@ -450,7 +432,7 @@
     {"id": 14, "op": ":=", "arg1": "t4", "arg2": "", "result": "z"},
     {"id": 15, "op": "write", "arg1": "", "arg2": "", "result": "z"}
   ],
-  "ast": {"id": 207, "type": "Program", "info": "", "children": [{"id": 208, "type": "Block", "info": "", "children": [{"id": 209, "type": "VarDecls", "info": "", "children": []},{"id": 210, "type": "Stmt", "info": "Assign", "children": []},{"id": 214, "type": "Stmt", "info": "Assign", "children": []},{"id": 218, "type": "Stmt", "info": "Assign", "children": []},{"id": 222, "type": "Stmt", "info": "Assign", "children": []},{"id": 229, "type": "Stmt", "info": "Write", "children": []},{"id": 233, "type": "Stmt", "info": "Assign", "children": []},{"id": 239, "type": "Stmt", "info": "Write", "children": []},{"id": 243, "type": "Stmt", "info": "Assign", "children": []},{"id": 249, "type": "Stmt", "info": "Write", "children": []},{"id": 253, "type": "Stmt", "info": "Assign", "children": []},{"id": 259, "type": "Stmt", "info": "Write", "children": []}]}]}
+  "ast": {"id": 104, "type": "Program", "info": "", "children": [{"id": 105, "type": "Block", "info": "", "children": [{"id": 106, "type": "VarDecls", "info": "", "children": []},{"id": 107, "type": "Stmt", "info": "Assign", "children": []},{"id": 109, "type": "Stmt", "info": "Assign", "children": []},{"id": 111, "type": "Stmt", "info": "Assign", "children": []},{"id": 113, "type": "Stmt", "info": "Assign", "children": []},{"id": 117, "type": "Stmt", "info": "Write", "children": []},{"id": 119, "type": "Stmt", "info": "Assign", "children": []},{"id": 123, "type": "Stmt", "info": "Write", "children": []},{"id": 125, "type": "Stmt", "info": "Assign", "children": []},{"id": 129, "type": "Stmt", "info": "Write", "children": []},{"id": 131, "type": "Stmt", "info": "Assign", "children": []},{"id": 135, "type": "Stmt", "info": "Write", "children": []}]}]}
 },
   "test5.pl": {
   "filename": "test5.pl",
@@ -506,15 +488,16 @@
     {"id": 48, "line": 14, "type": 54, "value": "EOF"}
   ],
   "errors": [
-    {"code": 24, "line": 5, "msg": "Expression cannot start with this token: ;"},
-    {"code": 9, "line": 6, "msg": "Expected token type 50"},
+    {"code": 24, "line": 5, "msg": "Expression cannot start with token: ;"},
+    {"code": 17, "line": 6, "msg": "Expected token type 10"},
+    {"code": 9, "line": 7, "msg": "Expected token type 50"},
     {"code": 47, "line": 7, "msg": "Unexpected tokens after program end."}
   ],
   "tac": [
     {"id": 1, "op": "+", "arg1": "5", "arg2": "t1", "result": "t2"},
     {"id": 2, "op": ":=", "arg1": "t2", "arg2": "", "result": "x"}
   ],
-  "ast": {"id": 263, "type": "Program", "info": "", "children": [{"id": 264, "type": "Block", "info": "", "children": [{"id": 265, "type": "VarDecls", "info": "", "children": []},{"id": 266, "type": "Stmt", "info": "Assign", "children": []}]}]}
+  "ast": {"id": 137, "type": "Program", "info": "", "children": [{"id": 138, "type": "Block", "info": "", "children": [{"id": 139, "type": "VarDecls", "info": "", "children": []},{"id": 140, "type": "Stmt", "info": "Assign", "children": []}]}]}
 },
   "test6.pl": {
   "filename": "test6.pl",
@@ -572,25 +555,30 @@
     {"id": 50, "line": 18, "type": 54, "value": "EOF"}
   ],
   "errors": [
-    {"code": 0, "line": 17, "msg": "EXIT statement not within a loop."}
+    {"code": 0, "line": 7, "msg": "Type mismatch: Cannot assign boolean to 'y' (integer)"},
+    {"code": 0, "line": 8, "msg": "Type mismatch: Cannot assign integer to 'b' (boolean)"},
+    {"code": 0, "line": 9, "msg": "AND requires boolean operands."},
+    {"code": 0, "line": 9, "msg": "Type mismatch: Cannot assign boolean to 'x' (integer)"},
+    {"code": 0, "line": 12, "msg": "Type mismatch: Cannot assign string to 'x' (integer)"},
+    {"code": 0, "line": 14, "msg": "Arithmetic operation requires numeric operands."},
+    {"code": 0, "line": 16, "msg": "EXIT statement not within a loop."}
   ],
   "tac": [
     {"id": 1, "op": ":=", "arg1": "5", "arg2": "", "result": "x"},
-    {"id": 2, "op": "=", "arg1": "1", "arg2": "", "result": "1"},
-    {"id": 3, "op": ":=", "arg1": "1", "arg2": "", "result": "y"},
-    {"id": 4, "op": "+", "arg1": "x", "arg2": "2", "result": "t1"},
-    {"id": 5, "op": ":=", "arg1": "t1", "arg2": "", "result": "b"},
-    {"id": 6, "op": "and", "arg1": "x", "arg2": "y", "result": "t2"},
-    {"id": 7, "op": ":=", "arg1": "t2", "arg2": "", "result": "x"},
-    {"id": 8, "op": "jnz", "arg1": "b", "arg2": "", "result": "L1"},
-    {"id": 9, "op": "j", "arg1": "", "arg2": "", "result": "L2"},
-    {"id": 10, "op": "label", "arg1": "", "arg2": "", "result": "L1"},
-    {"id": 11, "op": ":=", "arg1": "'hello'", "arg2": "", "result": "x"},
-    {"id": 12, "op": "label", "arg1": "", "arg2": "", "result": "L2"},
-    {"id": 13, "op": "*", "arg1": "x", "arg2": "'world'", "result": "t3"},
-    {"id": 14, "op": ":=", "arg1": "t3", "arg2": "", "result": "x"}
+    {"id": 2, "op": ":=", "arg1": "1", "arg2": "", "result": "y"},
+    {"id": 3, "op": "+", "arg1": "x", "arg2": "2", "result": "t1"},
+    {"id": 4, "op": ":=", "arg1": "t1", "arg2": "", "result": "b"},
+    {"id": 5, "op": "and", "arg1": "x", "arg2": "y", "result": "t2"},
+    {"id": 6, "op": ":=", "arg1": "t2", "arg2": "", "result": "x"},
+    {"id": 7, "op": "jnz", "arg1": "b", "arg2": "", "result": "L1"},
+    {"id": 8, "op": "j", "arg1": "", "arg2": "", "result": "L2"},
+    {"id": 9, "op": "label", "arg1": "", "arg2": "", "result": "L1"},
+    {"id": 10, "op": ":=", "arg1": "'hello'", "arg2": "", "result": "x"},
+    {"id": 11, "op": "label", "arg1": "", "arg2": "", "result": "L2"},
+    {"id": 12, "op": "*", "arg1": "x", "arg2": "'world'", "result": "t3"},
+    {"id": 13, "op": ":=", "arg1": "t3", "arg2": "", "result": "x"}
   ],
-  "ast": {"id": 273, "type": "Program", "info": "", "children": [{"id": 274, "type": "Block", "info": "", "children": [{"id": 275, "type": "VarDecls", "info": "", "children": []},{"id": 276, "type": "Stmt", "info": "Assign", "children": []},{"id": 280, "type": "Stmt", "info": "Assign", "children": []},{"id": 284, "type": "Stmt", "info": "Assign", "children": []},{"id": 291, "type": "Stmt", "info": "Assign", "children": []},{"id": 297, "type": "Stmt", "info": "If", "children": [{"id": 301, "type": "Stmt", "info": "Assign", "children": []}]},{"id": 305, "type": "Stmt", "info": "Assign", "children": []},{"id": 312, "type": "Stmt", "info": "Exit", "children": []}]}]}
+  "ast": {"id": 144, "type": "Program", "info": "", "children": [{"id": 145, "type": "Block", "info": "", "children": [{"id": 146, "type": "VarDecls", "info": "", "children": []},{"id": 147, "type": "Stmt", "info": "Assign", "children": []},{"id": 149, "type": "Stmt", "info": "Assign", "children": []},{"id": 151, "type": "Stmt", "info": "Assign", "children": []},{"id": 155, "type": "Stmt", "info": "Assign", "children": []},{"id": 159, "type": "Stmt", "info": "If", "children": [{"id": 161, "type": "Stmt", "info": "Assign", "children": []}]},{"id": 163, "type": "Stmt", "info": "Assign", "children": []},{"id": 167, "type": "Stmt", "info": "Exit", "children": []}]}]}
 },
   "test7.pl": {
   "filename": "test7.pl",
@@ -701,7 +689,7 @@
     {"id": 3, "op": "<=", "arg1": "i", "arg2": "5", "result": "t1"},
     {"id": 4, "op": "jz", "arg1": "t1", "arg2": "", "result": "L2"},
     {"id": 5, "op": "*", "arg1": "i", "arg2": "2", "result": "t2"},
-    {"id": 6, "op": ":=", "arg1": "t2", "arg2": "", "result": "numbers"},
+    {"id": 6, "op": "array_store", "arg1": "numbers", "arg2": "i", "result": "t2"},
     {"id": 7, "op": "+", "arg1": "i", "arg2": "1", "result": "t3"},
     {"id": 8, "op": ":=", "arg1": "t3", "arg2": "", "result": "i"},
     {"id": 9, "op": "j", "arg1": "", "arg2": "", "result": "L1"},
@@ -711,7 +699,7 @@
     {"id": 13, "op": "label", "arg1": "", "arg2": "", "result": "L3"},
     {"id": 14, "op": "<=", "arg1": "i", "arg2": "5", "result": "t4"},
     {"id": 15, "op": "jz", "arg1": "t4", "arg2": "", "result": "L4"},
-    {"id": 16, "op": "array_access", "arg1": "numbers", "arg2": "i", "result": "t5"},
+    {"id": 16, "op": "array_load", "arg1": "numbers", "arg2": "i", "result": "t5"},
     {"id": 17, "op": "+", "arg1": "sum", "arg2": "t5", "result": "t6"},
     {"id": 18, "op": ":=", "arg1": "t6", "arg2": "", "result": "sum"},
     {"id": 19, "op": "+", "arg1": "i", "arg2": "1", "result": "t7"},
@@ -719,10 +707,10 @@
     {"id": 21, "op": "j", "arg1": "", "arg2": "", "result": "L3"},
     {"id": 22, "op": "label", "arg1": "", "arg2": "", "result": "L4"},
     {"id": 23, "op": "write", "arg1": "", "arg2": "", "result": "sum"},
-    {"id": 24, "op": "array_access", "arg1": "numbers", "arg2": "3", "result": "t8"},
+    {"id": 24, "op": "array_load", "arg1": "numbers", "arg2": "3", "result": "t8"},
     {"id": 25, "op": "write", "arg1": "", "arg2": "", "result": "t8"}
   ],
-  "ast": {"id": 313, "type": "Program", "info": "", "children": [{"id": 314, "type": "Block", "info": "", "children": [{"id": 315, "type": "TypeDecls", "info": "", "children": []},{"id": 316, "type": "VarDecls", "info": "", "children": []},{"id": 317, "type": "Stmt", "info": "Assign", "children": []},{"id": 322, "type": "Stmt", "info": "While", "children": [{"id": 323, "type": "Expression", "info": "t1", "children": [{"id": 326, "type": "RelOp", "info": "<=", "children": [{"id": 324, "type": "Term", "info": "i", "children": [{"id": 325, "type": "IdentRef", "info": "i", "children": []}]},{"id": 327, "type": "Expression", "info": "5", "children": [{"id": 328, "type": "Term", "info": "5", "children": [{"id": 329, "type": "Factor", "info": "5", "children": []}]}]}]}]},{"id": 330, "type": "Stmt", "info": "Compound", "children": [{"id": 331, "type": "Stmt", "info": "Assign", "children": []},{"id": 340, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 347, "type": "Stmt", "info": "Assign", "children": []},{"id": 351, "type": "Stmt", "info": "Assign", "children": []},{"id": 356, "type": "Stmt", "info": "While", "children": [{"id": 357, "type": "Expression", "info": "t4", "children": [{"id": 360, "type": "RelOp", "info": "<=", "children": [{"id": 358, "type": "Term", "info": "i", "children": [{"id": 359, "type": "IdentRef", "info": "i", "children": []}]},{"id": 361, "type": "Expression", "info": "5", "children": [{"id": 362, "type": "Term", "info": "5", "children": [{"id": 363, "type": "Factor", "info": "5", "children": []}]}]}]}]},{"id": 364, "type": "Stmt", "info": "Compound", "children": [{"id": 365, "type": "Stmt", "info": "Assign", "children": []},{"id": 375, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 382, "type": "Stmt", "info": "Write", "children": []},{"id": 386, "type": "Stmt", "info": "Write", "children": []}]}]}
+  "ast": {"id": 168, "type": "Program", "info": "", "children": [{"id": 169, "type": "Block", "info": "", "children": [{"id": 170, "type": "TypeDecls", "info": "", "children": []},{"id": 171, "type": "VarDecls", "info": "", "children": []},{"id": 172, "type": "Stmt", "info": "Assign", "children": []},{"id": 174, "type": "Stmt", "info": "While", "children": [{"id": 178, "type": "Stmt", "info": "Compound", "children": [{"id": 179, "type": "Stmt", "info": "Assign", "children": []},{"id": 184, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 188, "type": "Stmt", "info": "Assign", "children": []},{"id": 190, "type": "Stmt", "info": "Assign", "children": []},{"id": 192, "type": "Stmt", "info": "While", "children": [{"id": 196, "type": "Stmt", "info": "Compound", "children": [{"id": 197, "type": "Stmt", "info": "Assign", "children": []},{"id": 202, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 206, "type": "Stmt", "info": "Write", "children": []},{"id": 208, "type": "Stmt", "info": "Write", "children": []}]}]}
 },
   "test8.pl": {
   "filename": "test8.pl",
@@ -901,7 +889,7 @@
     {"id": 23, "op": "write", "arg1": "", "arg2": "", "result": "x"},
     {"id": 24, "op": "write", "arg1": "", "arg2": "", "result": "y"}
   ],
-  "ast": {"id": 393, "type": "Program", "info": "", "children": [{"id": 394, "type": "Block", "info": "", "children": [{"id": 395, "type": "VarDecls", "info": "", "children": []},{"id": 396, "type": "FuncDecl", "info": "", "children": [{"id": 397, "type": "Block", "info": "", "children": [{"id": 398, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 405, "type": "FuncDecl", "info": "", "children": [{"id": 406, "type": "Block", "info": "", "children": [{"id": 407, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 413, "type": "ProcDecl", "info": "", "children": [{"id": 414, "type": "Block", "info": "", "children": [{"id": 415, "type": "VarDecls", "info": "", "children": []},{"id": 416, "type": "Stmt", "info": "Assign", "children": []},{"id": 420, "type": "Stmt", "info": "Assign", "children": []},{"id": 424, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 428, "type": "Stmt", "info": "Assign", "children": []},{"id": 432, "type": "Stmt", "info": "Assign", "children": []},{"id": 436, "type": "Stmt", "info": "Assign", "children": []},{"id": 446, "type": "Stmt", "info": "Write", "children": []},{"id": 450, "type": "Stmt", "info": "Assign", "children": []},{"id": 460, "type": "Stmt", "info": "Write", "children": []},{"id": 464, "type": "Stmt", "info": "Call", "children": []},{"id": 471, "type": "Stmt", "info": "Write", "children": []},{"id": 475, "type": "Stmt", "info": "Write", "children": []}]}]}
+  "ast": {"id": 211, "type": "Program", "info": "", "children": [{"id": 212, "type": "Block", "info": "", "children": [{"id": 213, "type": "VarDecls", "info": "", "children": []},{"id": 214, "type": "FuncDecl", "info": "", "children": [{"id": 215, "type": "Block", "info": "", "children": [{"id": 216, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 220, "type": "FuncDecl", "info": "", "children": [{"id": 221, "type": "Block", "info": "", "children": [{"id": 222, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 226, "type": "ProcDecl", "info": "", "children": [{"id": 227, "type": "Block", "info": "", "children": [{"id": 228, "type": "VarDecls", "info": "", "children": []},{"id": 229, "type": "Stmt", "info": "Assign", "children": []},{"id": 231, "type": "Stmt", "info": "Assign", "children": []},{"id": 233, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 235, "type": "Stmt", "info": "Assign", "children": []},{"id": 237, "type": "Stmt", "info": "Assign", "children": []},{"id": 239, "type": "Stmt", "info": "Assign", "children": []},{"id": 243, "type": "Stmt", "info": "Write", "children": []},{"id": 245, "type": "Stmt", "info": "Assign", "children": []},{"id": 249, "type": "Stmt", "info": "Write", "children": []},{"id": 251, "type": "Stmt", "info": "Call", "children": []},{"id": 254, "type": "Stmt", "info": "Write", "children": []},{"id": 256, "type": "Stmt", "info": "Write", "children": []}]}]}
 },
   "test9.pl": {
   "filename": "test9.pl",
@@ -1086,47 +1074,45 @@
     {"id": 7, "op": "label", "arg1": "", "arg2": "", "result": "L2"},
     {"id": 8, "op": ":=", "arg1": "b", "arg2": "", "result": "maxFunc"},
     {"id": 9, "op": "label", "arg1": "", "arg2": "", "result": "L3"},
-    {"id": 10, "op": ":=", "arg1": "10", "arg2": "", "result": "numbers"},
-    {"id": 11, "op": ":=", "arg1": "25", "arg2": "", "result": "numbers"},
-    {"id": 12, "op": ":=", "arg1": "15", "arg2": "", "result": "numbers"},
+    {"id": 10, "op": "array_store", "arg1": "numbers", "arg2": "1", "result": "10"},
+    {"id": 11, "op": "array_store", "arg1": "numbers", "arg2": "2", "result": "25"},
+    {"id": 12, "op": "array_store", "arg1": "numbers", "arg2": "3", "result": "15"},
     {"id": 13, "op": ":=", "arg1": "0", "arg2": "", "result": "max"},
     {"id": 14, "op": ":=", "arg1": "1", "arg2": "", "result": "i"},
-    {"id": 15, "op": "=", "arg1": "0", "arg2": "", "result": "0"},
-    {"id": 16, "op": ":=", "arg1": "0", "arg2": "", "result": "found"},
-    {"id": 17, "op": "label", "arg1": "", "arg2": "", "result": "L4"},
-    {"id": 18, "op": "<=", "arg1": "i", "arg2": "3", "result": "t2"},
-    {"id": 19, "op": "jz", "arg1": "t2", "arg2": "", "result": "L5"},
-    {"id": 20, "op": "array_access", "arg1": "numbers", "arg2": "i", "result": "t3"},
-    {"id": 21, "op": "param", "arg1": "", "arg2": "", "result": "max"},
-    {"id": 22, "op": "param", "arg1": "", "arg2": "", "result": "t3"},
-    {"id": 23, "op": "call", "arg1": "maxFunc", "arg2": "2", "result": "t4"},
-    {"id": 24, "op": ":=", "arg1": "t4", "arg2": "", "result": "temp"},
-    {"id": 25, "op": ">", "arg1": "temp", "arg2": "20", "result": "t5"},
-    {"id": 26, "op": "jnz", "arg1": "t5", "arg2": "", "result": "L6"},
-    {"id": 27, "op": "j", "arg1": "", "arg2": "", "result": "L7"},
-    {"id": 28, "op": "label", "arg1": "", "arg2": "", "result": "L6"},
-    {"id": 29, "op": "=", "arg1": "1", "arg2": "", "result": "1"},
-    {"id": 30, "op": ":=", "arg1": "1", "arg2": "", "result": "found"},
-    {"id": 31, "op": "j", "arg1": "", "arg2": "", "result": "L5"},
-    {"id": 32, "op": "label", "arg1": "", "arg2": "", "result": "L7"},
-    {"id": 33, "op": ":=", "arg1": "temp", "arg2": "", "result": "max"},
-    {"id": 34, "op": "+", "arg1": "i", "arg2": "1", "result": "t6"},
-    {"id": 35, "op": ":=", "arg1": "t6", "arg2": "", "result": "i"},
-    {"id": 36, "op": "j", "arg1": "", "arg2": "", "result": "L4"},
-    {"id": 37, "op": "label", "arg1": "", "arg2": "", "result": "L5"},
-    {"id": 38, "op": "write", "arg1": "", "arg2": "", "result": "max"},
-    {"id": 39, "op": "write", "arg1": "", "arg2": "", "result": "found"},
-    {"id": 40, "op": ">", "arg1": "max", "arg2": "0", "result": "t7"},
-    {"id": 41, "op": "and", "arg1": "found", "arg2": "t7", "result": "t8"},
-    {"id": 42, "op": "jnz", "arg1": "t8", "arg2": "", "result": "L8"},
-    {"id": 43, "op": "j", "arg1": "", "arg2": "", "result": "L9"},
-    {"id": 44, "op": "label", "arg1": "", "arg2": "", "result": "L8"},
-    {"id": 45, "op": "write", "arg1": "", "arg2": "", "result": "'Found large number'"},
-    {"id": 46, "op": "j", "arg1": "", "arg2": "", "result": "L10"},
-    {"id": 47, "op": "label", "arg1": "", "arg2": "", "result": "L9"},
-    {"id": 48, "op": "write", "arg1": "", "arg2": "", "result": "'No large number found'"},
-    {"id": 49, "op": "label", "arg1": "", "arg2": "", "result": "L10"}
+    {"id": 15, "op": ":=", "arg1": "0", "arg2": "", "result": "found"},
+    {"id": 16, "op": "label", "arg1": "", "arg2": "", "result": "L4"},
+    {"id": 17, "op": "<=", "arg1": "i", "arg2": "3", "result": "t2"},
+    {"id": 18, "op": "jz", "arg1": "t2", "arg2": "", "result": "L5"},
+    {"id": 19, "op": "array_load", "arg1": "numbers", "arg2": "i", "result": "t3"},
+    {"id": 20, "op": "param", "arg1": "", "arg2": "", "result": "max"},
+    {"id": 21, "op": "param", "arg1": "", "arg2": "", "result": "t3"},
+    {"id": 22, "op": "call", "arg1": "maxFunc", "arg2": "2", "result": "t4"},
+    {"id": 23, "op": ":=", "arg1": "t4", "arg2": "", "result": "temp"},
+    {"id": 24, "op": ">", "arg1": "temp", "arg2": "20", "result": "t5"},
+    {"id": 25, "op": "jnz", "arg1": "t5", "arg2": "", "result": "L6"},
+    {"id": 26, "op": "j", "arg1": "", "arg2": "", "result": "L7"},
+    {"id": 27, "op": "label", "arg1": "", "arg2": "", "result": "L6"},
+    {"id": 28, "op": ":=", "arg1": "1", "arg2": "", "result": "found"},
+    {"id": 29, "op": "j", "arg1": "", "arg2": "", "result": "L5"},
+    {"id": 30, "op": "label", "arg1": "", "arg2": "", "result": "L7"},
+    {"id": 31, "op": ":=", "arg1": "temp", "arg2": "", "result": "max"},
+    {"id": 32, "op": "+", "arg1": "i", "arg2": "1", "result": "t6"},
+    {"id": 33, "op": ":=", "arg1": "t6", "arg2": "", "result": "i"},
+    {"id": 34, "op": "j", "arg1": "", "arg2": "", "result": "L4"},
+    {"id": 35, "op": "label", "arg1": "", "arg2": "", "result": "L5"},
+    {"id": 36, "op": "write", "arg1": "", "arg2": "", "result": "max"},
+    {"id": 37, "op": "write", "arg1": "", "arg2": "", "result": "found"},
+    {"id": 38, "op": ">", "arg1": "max", "arg2": "0", "result": "t7"},
+    {"id": 39, "op": "and", "arg1": "found", "arg2": "t7", "result": "t8"},
+    {"id": 40, "op": "jnz", "arg1": "t8", "arg2": "", "result": "L8"},
+    {"id": 41, "op": "j", "arg1": "", "arg2": "", "result": "L9"},
+    {"id": 42, "op": "label", "arg1": "", "arg2": "", "result": "L8"},
+    {"id": 43, "op": "write", "arg1": "", "arg2": "", "result": "'Found large number'"},
+    {"id": 44, "op": "j", "arg1": "", "arg2": "", "result": "L10"},
+    {"id": 45, "op": "label", "arg1": "", "arg2": "", "result": "L9"},
+    {"id": 46, "op": "write", "arg1": "", "arg2": "", "result": "'No large number found'"},
+    {"id": 47, "op": "label", "arg1": "", "arg2": "", "result": "L10"}
   ],
-  "ast": {"id": 479, "type": "Program", "info": "", "children": [{"id": 480, "type": "Block", "info": "", "children": [{"id": 481, "type": "TypeDecls", "info": "", "children": []},{"id": 482, "type": "VarDecls", "info": "", "children": []},{"id": 483, "type": "FuncDecl", "info": "", "children": [{"id": 484, "type": "Block", "info": "", "children": [{"id": 485, "type": "Stmt", "info": "If", "children": [{"id": 493, "type": "Stmt", "info": "Assign", "children": []},{"id": 497, "type": "Stmt", "info": "Assign", "children": []}]}]}]},{"id": 501, "type": "Stmt", "info": "Assign", "children": []},{"id": 508, "type": "Stmt", "info": "Assign", "children": []},{"id": 515, "type": "Stmt", "info": "Assign", "children": []},{"id": 522, "type": "Stmt", "info": "Assign", "children": []},{"id": 526, "type": "Stmt", "info": "Assign", "children": []},{"id": 530, "type": "Stmt", "info": "Assign", "children": []},{"id": 535, "type": "Stmt", "info": "While", "children": [{"id": 536, "type": "Expression", "info": "t2", "children": [{"id": 539, "type": "RelOp", "info": "<=", "children": [{"id": 537, "type": "Term", "info": "i", "children": [{"id": 538, "type": "IdentRef", "info": "i", "children": []}]},{"id": 540, "type": "Expression", "info": "3", "children": [{"id": 541, "type": "Term", "info": "3", "children": [{"id": 542, "type": "Factor", "info": "3", "children": []}]}]}]}]},{"id": 543, "type": "Stmt", "info": "Compound", "children": [{"id": 544, "type": "Stmt", "info": "Assign", "children": []},{"id": 557, "type": "Stmt", "info": "If", "children": [{"id": 565, "type": "Stmt", "info": "Compound", "children": [{"id": 566, "type": "Stmt", "info": "Assign", "children": []},{"id": 571, "type": "Stmt", "info": "Exit", "children": []}]}]},{"id": 572, "type": "Stmt", "info": "Assign", "children": []},{"id": 576, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 583, "type": "Stmt", "info": "Write", "children": []},{"id": 587, "type": "Stmt", "info": "Write", "children": []},{"id": 591, "type": "Stmt", "info": "If", "children": [{"id": 604, "type": "Stmt", "info": "Write", "children": []},{"id": 608, "type": "Stmt", "info": "Write", "children": []}]}]}]}
+  "ast": {"id": 258, "type": "Program", "info": "", "children": [{"id": 259, "type": "Block", "info": "", "children": [{"id": 260, "type": "TypeDecls", "info": "", "children": []},{"id": 261, "type": "VarDecls", "info": "", "children": []},{"id": 262, "type": "FuncDecl", "info": "", "children": [{"id": 263, "type": "Block", "info": "", "children": [{"id": 264, "type": "Stmt", "info": "If", "children": [{"id": 268, "type": "Stmt", "info": "Assign", "children": []},{"id": 270, "type": "Stmt", "info": "Assign", "children": []}]}]}]},{"id": 272, "type": "Stmt", "info": "Assign", "children": []},{"id": 275, "type": "Stmt", "info": "Assign", "children": []},{"id": 278, "type": "Stmt", "info": "Assign", "children": []},{"id": 281, "type": "Stmt", "info": "Assign", "children": []},{"id": 283, "type": "Stmt", "info": "Assign", "children": []},{"id": 285, "type": "Stmt", "info": "Assign", "children": []},{"id": 287, "type": "Stmt", "info": "While", "children": [{"id": 291, "type": "Stmt", "info": "Compound", "children": [{"id": 292, "type": "Stmt", "info": "Assign", "children": []},{"id": 297, "type": "Stmt", "info": "If", "children": [{"id": 301, "type": "Stmt", "info": "Compound", "children": [{"id": 302, "type": "Stmt", "info": "Assign", "children": []},{"id": 304, "type": "Stmt", "info": "Exit", "children": []}]}]},{"id": 305, "type": "Stmt", "info": "Assign", "children": []},{"id": 307, "type": "Stmt", "info": "Assign", "children": []}]}]},{"id": 311, "type": "Stmt", "info": "Write", "children": []},{"id": 313, "type": "Stmt", "info": "Write", "children": []},{"id": 315, "type": "Stmt", "info": "If", "children": [{"id": 322, "type": "Stmt", "info": "Write", "children": []},{"id": 324, "type": "Stmt", "info": "Write", "children": []}]}]}]}
 }
 }

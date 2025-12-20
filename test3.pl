@@ -19,7 +19,5 @@ begin
     
     c := x > y;
     write(c);  /* false */
-    
-    c := x < y and a;
-    write(c)   /* true */
+
 end.

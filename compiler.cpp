@@ -8,33 +8,28 @@
 #include <iomanip>
 #include <functional>
 #include <stack>
+#include <cctype>
 
 using namespace std;
 
-// ==========================================
-// 1. 全局定义与枚举
-// ==========================================
-
 enum TokenType {
     T_NULL, T_IDENT, T_NUMBER, T_STRING, T_PROGRAM,
-    // Keywords
-    T_CONST, T_VAR, T_PROCEDURE, T_FUNCTION, T_BEGIN, T_END, T_IF, T_THEN, 
-    T_ELSE, T_WHILE, T_DO, T_CALL, T_READ, T_WRITE, T_EXIT, T_ODD, 
+    T_CONST, T_VAR, T_PROCEDURE, T_FUNCTION, T_BEGIN, T_END, T_IF, T_THEN,
+    T_ELSE, T_WHILE, T_DO, T_CALL, T_READ, T_WRITE, T_EXIT, T_ODD,
     T_TYPE, T_ARRAY, T_OF, T_OR, T_AND, T_NOT, T_DIV, T_MOD,
     T_TRUE, T_FALSE, T_INTEGER, T_REAL, T_BOOLEAN,
-    // Operators & Delimiters
     T_PLUS, T_MINUS, T_MUL, T_SLASH, T_EQ, T_NEQ, T_LT, T_LE, T_GT, T_GE,
-    T_LPAREN, T_RPAREN, T_LBRACKET, T_RBRACKET, T_COMMA, T_SEMICOLON, 
+    T_LPAREN, T_RPAREN, T_LBRACKET, T_RBRACKET, T_COMMA, T_SEMICOLON,
     T_PERIOD, T_ASSIGN, T_COLON, T_DOTDOT, T_EOF
 };
 
 struct Token {
-    int id;
-    int line;
-    TokenType type;
-    string value; // 标识符存名字，数字存数值字符串
-    int intVal;   // 预转换的整数值
-    double realVal; // 预转换的实数值
+    int id = 0;
+    int line = 0;
+    TokenType type = T_NULL;
+    string value;
+    int intVal = 0;
+    double realVal = 0.0;
 };
 
 struct Error {
@@ -43,7 +38,6 @@ struct Error {
     string msg;
 };
 
-// 三地址码结构
 struct Quadruple {
     int id;
     string op;
@@ -52,14 +46,10 @@ struct Quadruple {
     string result;
 };
 
-// ==========================================
-// 2. 词法分析器 (Lexer)
-// ==========================================
-
 class Lexer {
 private:
     string src;
-    int pos;
+    size_t pos;
     int line;
     int tokenCount;
     map<string, TokenType> keywords;
@@ -67,7 +57,7 @@ private:
 public:
     vector<Token> tokens;
 
-    Lexer(string source) : src(source), pos(0), line(1), tokenCount(0) {
+    Lexer(string source) : src(move(source)), pos(0), line(1), tokenCount(0) {
         initKeywords();
     }
 
@@ -93,67 +83,66 @@ public:
     void scan() {
         while (pos < src.length()) {
             char ch = src[pos];
-
-            if (isspace(ch)) {
+            if (isspace(static_cast<unsigned char>(ch))) {
                 if (ch == '\n') line++;
                 pos++;
-            } 
-            else if (ch == '/' && pos + 1 < src.length() && src[pos+1] == '*') {
-                // 注释处理
+            } else if (ch == '/' && pos + 1 < src.length() && src[pos + 1] == '*') {
                 pos += 2;
-                while (pos + 1 < src.length() && !(src[pos] == '*' && src[pos+1] == '/')) {
+                while (pos + 1 < src.length() && !(src[pos] == '*' && src[pos + 1] == '/')) {
                     if (src[pos] == '\n') line++;
                     pos++;
                 }
-                pos += 2; 
-            }
-            else if (isalpha(ch)) {
-                // 标识符或关键字
+                if (pos + 1 < src.length()) pos += 2;
+            } else if (isalpha(static_cast<unsigned char>(ch))) {
                 string buf;
-                while (isalnum(src[pos])) buf += src[pos++];
+                while (pos < src.length() && isalnum(static_cast<unsigned char>(src[pos]))) {
+                    buf += src[pos++];
+                }
                 TokenType type = T_IDENT;
-                if (keywords.count(buf)) type = keywords[buf];
+                string lowerBuf = buf;
+                transform(lowerBuf.begin(), lowerBuf.end(), lowerBuf.begin(), ::tolower);
+                if (keywords.count(lowerBuf)) {
+                    type = keywords[lowerBuf];
+                    buf = lowerBuf;
+                }
                 addToken(type, buf);
-            }
-            else if (isdigit(ch)) {
-                // 数字 (处理 10.. vs 10.5)
+            } else if (isdigit(static_cast<unsigned char>(ch))) {
                 string buf;
-                while (isdigit(src[pos])) buf += src[pos++];
-                
-                // 关键逻辑：如果是 '.', 检查下一个字符
-                if (src[pos] == '.') {
-                    if (pos + 1 < src.length() && src[pos+1] == '.') {
-                        // 是 .. ，当前数字是整数，不吃掉点
+                bool isReal = false;
+                while (pos < src.length() && isdigit(static_cast<unsigned char>(src[pos]))) {
+                    buf += src[pos++];
+                }
+                if (pos < src.length() && src[pos] == '.') {
+                    if (pos + 1 < src.length() && src[pos + 1] == '.') {
+                        // part of ..
                     } else {
-                        // 是实数
+                        isReal = true;
                         buf += src[pos++];
-                        while (isdigit(src[pos])) buf += src[pos++];
+                        while (pos < src.length() && isdigit(static_cast<unsigned char>(src[pos]))) {
+                            buf += src[pos++];
+                        }
                     }
                 }
                 addToken(T_NUMBER, buf);
-            }
-            // [FIX 1] 添加字符串字面量的处理
-            else if (ch == '\'') {
+                tokens.back().realVal = stod(buf);
+                if (!isReal) tokens.back().intVal = stoi(buf);
+            } else if (ch == '\'') {
                 string buf;
-                pos++; // 跳过开头的 '
+                pos++;
                 while (pos < src.length() && src[pos] != '\'') {
-                    if (src[pos] == '\n') line++; // 支持多行字符串
+                    if (src[pos] == '\n') line++;
                     buf += src[pos++];
                 }
-                if (pos < src.length()) pos++; // 跳过结尾的 '
+                if (pos < src.length()) pos++;
                 addToken(T_STRING, buf);
-            }
-            else {
-                // 符号
-                pos++; // 先将 pos 前进一位
+            } else {
+                pos++;
                 switch (ch) {
                     case ':':
                         if (pos < src.length() && src[pos] == '=') {
                             pos++;
                             addToken(T_ASSIGN, ":=");
-                        } else {
-                            addToken(T_COLON, ":");
-                        }
+                        } else addToken(T_COLON, ":");
                         break;
                     case '<':
                         if (pos < src.length() && src[pos] == '=') {
@@ -162,27 +151,20 @@ public:
                         } else if (pos < src.length() && src[pos] == '>') {
                             pos++;
                             addToken(T_NEQ, "<>");
-                        } else {
-                            addToken(T_LT, "<");
-                        }
+                        } else addToken(T_LT, "<");
                         break;
                     case '>':
                         if (pos < src.length() && src[pos] == '=') {
                             pos++;
                             addToken(T_GE, ">=");
-                        } else {
-                            addToken(T_GT, ">");
-                        }
+                        } else addToken(T_GT, ">");
                         break;
                     case '.':
                         if (pos < src.length() && src[pos] == '.') {
                             pos++;
                             addToken(T_DOTDOT, "..");
-                        } else {
-                            addToken(T_PERIOD, ".");
-                        }
+                        } else addToken(T_PERIOD, ".");
                         break;
-                    // 其他单字符符号
                     case '+': addToken(T_PLUS, "+"); break;
                     case '-': addToken(T_MINUS, "-"); break;
                     case '*': addToken(T_MUL, "*"); break;
@@ -194,50 +176,56 @@ public:
                     case ']': addToken(T_RBRACKET, "]"); break;
                     case ',': addToken(T_COMMA, ","); break;
                     case ';': addToken(T_SEMICOLON, ";"); break;
-                    default:
-                        // 错误：非法字符，暂略
-                        break;
+                    default: break;
                 }
             }
         }
         addToken(T_EOF, "EOF");
     }
 
-    void addToken(TokenType type, string val) {
+    void addToken(TokenType type, const string& val) {
         Token t;
         t.id = ++tokenCount;
         t.line = line;
         t.type = type;
         t.value = val;
-        if (type == T_NUMBER) {
-            if (val.find('.') != string::npos) t.realVal = stod(val);
-            else t.intVal = stoi(val);
-        }
         tokens.push_back(t);
     }
 };
 
-// ==========================================
-// 3. 语法树节点 (AST)
-// ==========================================
+enum DataType { D_UNKNOWN, D_INTEGER, D_REAL, D_BOOLEAN, D_STRING, D_VOID };
+
+struct SymbolInfo {
+    DataType valueType = D_UNKNOWN;
+    bool isArray = false;
+    DataType elementType = D_UNKNOWN;
+};
+
+struct TypeInfo {
+    bool isArray = false;
+    DataType baseType = D_UNKNOWN;
+};
 
 struct ASTNode {
     int id;
     static int global_id;
-    string type; // "Program", "Block", "IfStmt", "BinOp" etc.
-    string info; // 额外信息，如操作符、变量名
+    string type;
+    string info;
+    DataType dataType = D_UNKNOWN;
     vector<ASTNode*> children;
-
-    ASTNode(string t, string i = "") : type(t), info(i) { id = ++global_id; }
-    void add(ASTNode* node) { if(node) children.push_back(node); }
+    ASTNode(string t, string i = "") : type(move(t)), info(move(i)) { id = ++global_id; }
+    void add(ASTNode* node) { if (node) children.push_back(node); }
 };
 int ASTNode::global_id = 0;
 
-// ==========================================
-// 4. 语法分析与语义分析器
-// ==========================================
-
 class Parser {
+    struct Designator {
+        string name;
+        vector<string> indices;
+        SymbolInfo symbol;
+        int line;
+    };
+
     vector<Token>& tokens;
     int cur;
     vector<Error> errors;
@@ -245,625 +233,856 @@ class Parser {
     int tempCount;
     int labelCount;
     stack<string> loopExitLabels;
+    vector<map<string, SymbolInfo>> scopeStack;
+    map<string, TypeInfo> typeTable;
 
 public:
     ASTNode* root;
 
-    Parser(vector<Token>& t) : tokens(t), cur(0), tempCount(0), labelCount(0) {}
-
-    Token peek() { return tokens[cur]; }
-    Token advance() { return tokens[cur++]; }
-    
-    void error(int code, string msg) {
-        errors.push_back({code, peek().line, msg});
-        // 简单的错误恢复：跳过直到分号
-        while(peek().type != T_SEMICOLON && peek().type != T_EOF && peek().type != T_END) {
-            advance();
-        }
+    Parser(vector<Token>& t)
+        : tokens(t), cur(0), tempCount(0), labelCount(0), root(nullptr) {
+        typeTable["integer"] = {false, D_INTEGER};
+        typeTable["real"] = {false, D_REAL};
+        typeTable["boolean"] = {false, D_BOOLEAN};
     }
 
-    bool match(TokenType t) {
-        if (peek().type == t) {
+    void parse() { root = parseProgram(); }
+
+    vector<Error> getErrors() { return errors; }
+    vector<Quadruple> getQuads() { return quads; }
+
+private:
+    Token peek(int offset = 0) const {
+        int idx = cur + offset;
+        if (idx >= static_cast<int>(tokens.size())) return tokens.back();
+        return tokens[idx];
+    }
+
+    Token previous() const {
+        if (cur == 0) return tokens[0];
+        return tokens[cur - 1];
+    }
+
+    bool isAtEnd() const { return peek().type == T_EOF; }
+
+    Token advance() {
+        if (!isAtEnd()) cur++;
+        return tokens[cur - 1];
+    }
+
+    bool match(TokenType type) {
+        if (peek().type == type) {
             advance();
             return true;
         }
         return false;
     }
 
-    void expect(TokenType t, int errCode) {
-        if (!match(t)) {
-            error(errCode, "Expected token type " + to_string(t));
+    void expect(TokenType type, int errCode) {
+        if (!match(type)) {
+            error(errCode, "Expected token type " + to_string(type), peek().line, true);
         }
     }
 
-    // 生成临时变量
+    void error(int code, const string& msg, int line = -1, bool recover = false) {
+        int lineNo = line;
+        if (lineNo == -1) lineNo = peek().line;
+        errors.push_back({code, lineNo, msg});
+        if (recover) {
+            while (!isAtEnd() &&
+                   peek().type != T_SEMICOLON &&
+                   peek().type != T_END &&
+                   peek().type != T_ELSE) {
+                advance();
+            }
+        }
+    }
+
     string newTemp() { return "t" + to_string(++tempCount); }
-    // 生成标签
     string newLabel() { return "L" + to_string(++labelCount); }
-    // 生成四元式
-    void emit(string op, string arg1, string arg2, string res) {
-        quads.push_back({(int)quads.size() + 1, op, arg1, arg2, res});
+
+    void emit(const string& op, const string& arg1, const string& arg2, const string& res) {
+        quads.push_back({static_cast<int>(quads.size()) + 1, op, arg1, arg2, res});
     }
 
-    // --- 递归下降分析函数 ---
+    void enterScope() { scopeStack.push_back({}); }
+    void exitScope() { if (!scopeStack.empty()) scopeStack.pop_back(); }
 
-    void parse() {
-        root = parseProgram();
+    void declareSymbol(const string& name, const SymbolInfo& info) {
+        if (scopeStack.empty()) enterScope();
+        scopeStack.back()[name] = info;
     }
+
+    SymbolInfo* lookupSymbol(const string& name) {
+        for (auto it = scopeStack.rbegin(); it != scopeStack.rend(); ++it) {
+            auto found = it->find(name);
+            if (found != it->end()) return &found->second;
+        }
+        return nullptr;
+    }
+
+    SymbolInfo getSymbolInfo(const string& name, int line) {
+        SymbolInfo* info = lookupSymbol(name);
+        if (!info) {
+            error(0, "Undeclared identifier '" + name + "'", line);
+            return SymbolInfo{};
+        }
+        return *info;
+    }
+
+    bool isRelOp(TokenType t) const {
+        return t == T_EQ || t == T_NEQ || t == T_LT || t == T_LE || t == T_GT || t == T_GE;
+    }
+
+    bool isAddOp(TokenType t) const {
+        return t == T_PLUS || t == T_MINUS || t == T_OR;
+    }
+
+    bool isMulOp(TokenType t) const {
+        return t == T_MUL || t == T_SLASH || t == T_DIV || t == T_MOD || t == T_AND;
+    }
+
+    bool isNumericType(DataType dt) const {
+        return dt == D_INTEGER || dt == D_REAL;
+    }
+
+    bool isBooleanType(DataType dt) const {
+        return dt == D_BOOLEAN;
+    }
+
+    DataType combineNumericTypes(DataType left, DataType right) const {
+        if (left == D_REAL || right == D_REAL) return D_REAL;
+        if (left == D_INTEGER && right == D_INTEGER) return D_INTEGER;
+        return D_UNKNOWN;
+    }
+
+    bool isAssignable(DataType target, DataType source) const {
+        if (target == D_UNKNOWN || source == D_UNKNOWN) return true;
+        if (target == source) return true;
+        if (target == D_REAL && source == D_INTEGER) return true;
+        return false;
+    }
+
+    bool validRelational(TokenType op, DataType left, DataType right) const {
+        if (left == D_UNKNOWN || right == D_UNKNOWN) return true;
+        if ((op == T_EQ || op == T_NEQ) && left == right) return true;
+        if (isNumericType(left) && isNumericType(right)) return true;
+        return false;
+    }
+
+    string dataTypeName(DataType dt) const {
+        switch (dt) {
+            case D_INTEGER: return "integer";
+            case D_REAL: return "real";
+            case D_BOOLEAN: return "boolean";
+            case D_STRING: return "string";
+            case D_VOID: return "void";
+            default: return "unknown";
+        }
+    }
+
+    DataType tokenTypeToDataType(TokenType tt) {
+        switch (tt) {
+            case T_INTEGER: return D_INTEGER;
+            case T_REAL: return D_REAL;
+            case T_BOOLEAN: return D_BOOLEAN;
+            default: return D_UNKNOWN;
+        }
+    }
+
+    TypeInfo parseTypeDefinition() {
+        TypeInfo info;
+        if (match(T_ARRAY)) {
+            expect(T_LBRACKET, 29);
+            expect(T_NUMBER, 2);
+            expect(T_DOTDOT, 29);
+            expect(T_NUMBER, 2);
+            expect(T_RBRACKET, 22);
+            expect(T_OF, 29);
+            DataType base = parseBaseType();
+            info.isArray = true;
+            info.baseType = base;
+            return info;
+        }
+        if (peek().type == T_IDENT) {
+            string alias = peek().value;
+            auto it = typeTable.find(alias);
+            if (it != typeTable.end()) info = it->second;
+            else error(0, "Unknown type '" + alias + "'", peek().line);
+            advance();
+            return info;
+        }
+        DataType baseType = tokenTypeToDataType(peek().type);
+        if (baseType == D_UNKNOWN) error(0, "Unknown type.", peek().line);
+        advance();
+        info.isArray = false;
+        info.baseType = baseType;
+        return info;
+    }
+
+    DataType parseBaseType() {
+        if (peek().type == T_IDENT) {
+            string name = peek().value;
+            auto it = typeTable.find(name);
+            if (it != typeTable.end()) {
+                if (it->second.isArray) {
+                    error(0, "Array type '" + name + "' cannot be used here.", peek().line);
+                    advance();
+                    return D_UNKNOWN;
+                }
+                advance();
+                return it->second.baseType;
+            }
+            error(0, "Unknown type '" + name + "'", peek().line);
+            advance();
+            return D_UNKNOWN;
+        }
+        DataType dt = tokenTypeToDataType(peek().type);
+        if (dt == D_UNKNOWN) error(0, "Unknown type.", peek().line);
+        advance();
+        return dt;
+    }
+
+    SymbolInfo buildSymbolInfo() {
+        SymbolInfo info;
+        if (peek().type == T_ARRAY) {
+            TypeInfo t = parseTypeDefinition();
+            info.isArray = t.isArray;
+            info.elementType = t.baseType;
+            return info;
+        }
+        if (peek().type == T_IDENT) {
+            string typeName = peek().value;
+            auto it = typeTable.find(typeName);
+            if (it != typeTable.end()) {
+                if (it->second.isArray) {
+                    info.isArray = true;
+                    info.elementType = it->second.baseType;
+                } else {
+                    info.valueType = it->second.baseType;
+                }
+            } else {
+                error(0, "Unknown type '" + typeName + "'", peek().line);
+            }
+            advance();
+            return info;
+        }
+        DataType dt = tokenTypeToDataType(peek().type);
+        if (dt == D_UNKNOWN) error(0, "Unknown type.", peek().line);
+        else info.valueType = dt;
+        advance();
+        return info;
+    }
+
+    vector<pair<string, SymbolInfo>> parseParameterList() {
+        vector<pair<string, SymbolInfo>> params;
+        while (peek().type != T_RPAREN && peek().type != T_EOF) {
+            if (match(T_SEMICOLON)) continue;
+            match(T_VAR);
+            vector<string> names;
+            do {
+                if (peek().type == T_IDENT) {
+                    names.push_back(peek().value);
+                    advance();
+                } else {
+                    expect(T_IDENT, 4);
+                    break;
+                }
+            } while (match(T_COMMA));
+            expect(T_COLON, 5);
+            SymbolInfo info = buildSymbolInfo();
+            for (const string& n : names) {
+                params.push_back({n, info});
+            }
+            if (!match(T_SEMICOLON)) break;
+        }
+        return params;
+    }
+
+    Designator parseDesignator(const string& base, const SymbolInfo& sym, int line) {
+        Designator d;
+        d.name = base;
+        d.symbol = sym;
+        d.line = line;
+        while (match(T_LBRACKET)) {
+            ASTNode* idx = parseExp();
+            d.indices.push_back(idx->info);
+            expect(T_RBRACKET, 22);
+        }
+        if (!d.indices.empty() && !sym.isArray) {
+            error(0, "Identifier '" + base + "' is not an array.", line);
+        }
+        return d;
+    }
+
+    DataType designatorTargetType(const Designator& d) const {
+        if (d.indices.empty()) {
+            if (d.symbol.isArray) return D_UNKNOWN;
+            return d.symbol.valueType;
+        }
+        return d.symbol.elementType;
+    }
+
+    string loadDesignatorValue(const Designator& d) {
+        if (d.indices.empty()) {
+            if (d.symbol.isArray) {
+                error(0, "Array '" + d.name + "' requires an index.", d.line);
+            }
+            return d.name;
+        }
+        string current = d.name;
+        for (const string& idx : d.indices) {
+            string temp = newTemp();
+            emit("array_load", current, idx, temp);
+            current = temp;
+        }
+        return current;
+    }
+
+    void storeDesignatorValue(const Designator& d, const string& value) {
+        if (d.indices.empty()) {
+            if (d.symbol.isArray) {
+                error(0, "Cannot assign to entire array '" + d.name + "'.", d.line);
+                return;
+            }
+            emit(":=", value, "", d.name);
+            return;
+        }
+        string current = d.name;
+        for (size_t i = 0; i + 1 < d.indices.size(); ++i) {
+            string temp = newTemp();
+            emit("array_load", current, d.indices[i], temp);
+            current = temp;
+        }
+        emit("array_store", current, d.indices.back(), value);
+    }
+
     ASTNode* parseProgram() {
         ASTNode* node = new ASTNode("Program");
-        if (peek().type == T_PROGRAM) {
-            advance(); // 消耗 "program" token
-        }
-        node->add(parseBlock());
-        expect(T_PERIOD, 9); // 应为句号
-        // 检查程序结束后是否还有多余的token
+        match(T_PROGRAM);
+        enterScope();
+        node->add(parseBlock(false));
+        exitScope();
+        expect(T_PERIOD, 9);
         if (peek().type != T_EOF) {
             error(47, "Unexpected tokens after program end.");
         }
         return node;
     }
 
-    ASTNode* parseBlock() {
+    ASTNode* parseBlock(bool createScope = true) {
+        if (createScope) enterScope();
         ASTNode* node = new ASTNode("Block");
-        
-        // Const Decl
         if (peek().type == T_CONST) {
             advance();
             do {
                 expect(T_IDENT, 4);
                 expect(T_EQ, 1);
-                expect(T_NUMBER, 2);
+                if (peek().type == T_NUMBER || peek().type == T_STRING || peek().type == T_TRUE || peek().type == T_FALSE) {
+                    advance();
+                } else {
+                    error(2, "Invalid const value.", peek().line);
+                }
                 expect(T_SEMICOLON, 5);
-            } while (peek().type == T_IDENT); // 简化处理
+            } while (peek().type == T_IDENT);
             node->add(new ASTNode("ConstDecls"));
         }
 
-        // Type Decl
         if (peek().type == T_TYPE) {
             advance();
             while (peek().type == T_IDENT) {
-                advance(); // ident
+                string name = peek().value;
+                advance();
                 expect(T_EQ, 3);
-                // TypeExp 解析 (简化：假设只有 array)
-                if (match(T_ARRAY)) {
-                    expect(T_LBRACKET, 29);
-                    expect(T_NUMBER, 2);
-                    expect(T_DOTDOT, 29);
-                    expect(T_NUMBER, 2);
-                    expect(T_RBRACKET, 22);
-                    expect(T_OF, 29);
-                    // Type
-                    advance(); 
-                } else {
-                    advance(); // 基础类型
-                }
+                TypeInfo info = parseTypeDefinition();
+                typeTable[name] = info;
                 expect(T_SEMICOLON, 5);
             }
             node->add(new ASTNode("TypeDecls"));
         }
 
-        // Var Decl
         if (peek().type == T_VAR) {
             advance();
             while (peek().type == T_IDENT) {
+                vector<string> names;
                 do {
+                    names.push_back(peek().value);
                     advance();
                 } while (match(T_COMMA));
                 expect(T_COLON, 5);
-                advance(); // Type
+                SymbolInfo info = buildSymbolInfo();
                 expect(T_SEMICOLON, 5);
+                for (const string& n : names) declareSymbol(n, info);
             }
             node->add(new ASTNode("VarDecls"));
         }
 
-        // Func/Proc Decl
         while (peek().type == T_PROCEDURE || peek().type == T_FUNCTION) {
             bool isFunc = (peek().type == T_FUNCTION);
             ASTNode* sub = new ASTNode(isFunc ? "FuncDecl" : "ProcDecl");
             advance();
-            string name = peek().value;
-            advance(); // ident
-            
-            if (match(T_LPAREN)) {
-                // 参数列表解析 (略)
-                while(peek().type != T_RPAREN) advance();
-                match(T_RPAREN);
+            string name;
+            if (peek().type == T_IDENT) {
+                name = peek().value;
+                advance();
+            } else {
+                expect(T_IDENT, 4);
             }
-            
+            vector<pair<string, SymbolInfo>> params;
+            if (match(T_LPAREN)) {
+                params = parseParameterList();
+                expect(T_RPAREN, 22);
+            }
+            DataType retType = D_VOID;
             if (isFunc) {
                 expect(T_COLON, 5);
-                advance(); // 返回类型
+                retType = parseBaseType();
+                SymbolInfo funcInfo;
+                funcInfo.valueType = retType;
+                declareSymbol(name, funcInfo);
+            } else {
+                SymbolInfo procInfo;
+                procInfo.valueType = D_VOID;
+                declareSymbol(name, procInfo);
             }
             expect(T_SEMICOLON, 5);
-            sub->add(parseBlock());
+            enterScope();
+            for (const auto& param : params) {
+                declareSymbol(param.first, param.second);
+            }
+            sub->add(parseBlock(false));
+            exitScope();
             expect(T_SEMICOLON, 5);
             node->add(sub);
         }
 
         expect(T_BEGIN, 48);
-        if (peek().type != T_END) { // 只要不是立即就 end，就解析语句
+        if (peek().type != T_END) {
             node->add(parseStmt());
             while (match(T_SEMICOLON)) {
-                if (peek().type == T_END) break; // 如果分号是多余的，后面直接跟了end，就跳出
+                if (peek().type == T_END) break;
                 node->add(parseStmt());
             }
         }
-        match(T_END);
-        
+        expect(T_END, 17);
+        if (createScope) exitScope();
         return node;
     }
 
     ASTNode* parseStmt() {
         ASTNode* node = new ASTNode("Stmt");
-        
         if (peek().type == T_IDENT) {
-            // Assignment or Call (if call is implicit? No, call is explicit keyword for proc)
-            // But function return is ident := exp
-            string id = peek().value;
-            advance();
-            // Array access?
-            while (match(T_LBRACKET)) {
-                parseExp();
-                expect(T_RBRACKET, 22);
-            }
-            
+            Token identTok = advance();
+            string name = identTok.value;
+            SymbolInfo sym = getSymbolInfo(name, identTok.line);
+            Designator designator = parseDesignator(name, sym, identTok.line);
             expect(T_ASSIGN, 13);
-            string exprRes = parseExp()->info; // 获取表达式结果的临时变量名
-            emit(":=", exprRes, "", id); // 生成赋值三地址码
+            ASTNode* exprNode = parseExp();
+            DataType targetType = designatorTargetType(designator);
+            if (!isAssignable(targetType, exprNode->dataType)) {
+                error(0, "Type mismatch: Cannot assign " + dataTypeName(exprNode->dataType) +
+                             " to '" + name + "' (" + dataTypeName(targetType) + ")", identTok.line);
+            }
+            storeDesignatorValue(designator, exprNode->info);
             node->info = "Assign";
-        }
-        // [FIX 3] 增加 CALL 语句的处理
-        else if (match(T_CALL)) {
+        } else if (match(T_CALL)) {
             node->info = "Call";
-            string name = peek().value;
-            expect(T_IDENT, 14); // Expected identifier
+            string name;
+            if (peek().type == T_IDENT) {
+                name = peek().value;
+                advance();
+            } else {
+                expect(T_IDENT, 14);
+            }
             int argCount = 0;
-            // 处理参数
             if (match(T_LPAREN)) {
                 if (peek().type != T_RPAREN) {
                     do {
-                        string arg = parseExp()->info;
-                        emit("param", "", "", arg);
+                        ASTNode* arg = parseExp();
+                        emit("param", "", "", arg->info);
                         argCount++;
                     } while (match(T_COMMA));
                 }
                 expect(T_RPAREN, 22);
             }
             emit("call", name, to_string(argCount), "");
-        }
-        else if (match(T_IF)) {
+        } else if (match(T_IF)) {
             node->info = "If";
-            string cond = parseExp()->info;
+            ASTNode* cond = parseExp();
+            if (!isBooleanType(cond->dataType) && cond->dataType != D_UNKNOWN) {
+                error(0, "IF condition must be boolean.", previous().line);
+            }
+            string condPlace = cond->info;
             string L_true = newLabel();
             string L_false = newLabel();
-            
-            emit("jnz", cond, "", L_true); // 如果为真跳转
+            emit("jnz", condPlace, "", L_true);
             emit("j", "", "", L_false);
-            
             emit("label", "", "", L_true);
             expect(T_THEN, 16);
             node->add(parseStmt());
-            
             if (match(T_ELSE)) {
                 string L_end = newLabel();
-                emit("j", "", "", L_end); // 跳过else部分
+                emit("j", "", "", L_end);
                 emit("label", "", "", L_false);
                 node->add(parseStmt());
                 emit("label", "", "", L_end);
             } else {
                 emit("label", "", "", L_false);
             }
-        }
-        else if (match(T_WHILE)) {
-            node = new ASTNode("Stmt", "While");
-
-            // 1. 创建循环用的标签
-            string startLabel = newLabel(); // 循环开始的标签 (e.g., L4)
-            string endLabel = newLabel();   // 循环结束/退出的标签 (e.g., L5)
-
-            // 2. 将出口标签压入栈中，供 'exit' 语句使用
+        } else if (match(T_WHILE)) {
+            node->info = "While";
+            string startLabel = newLabel();
+            string endLabel = newLabel();
             loopExitLabels.push(endLabel);
-
-            // 3. 生成循环开始的标签
             emit("label", "", "", startLabel);
-
-            // 4. 解析循环条件
             ASTNode* cond = parseExp();
-            node->add(cond);
-            string condPlace = cond->info;
-
-            // 5. 生成条件判断和跳转指令
-            // 如果条件为假(0)，则跳转到循环出口
-            emit("jz", condPlace, "", endLabel);
-
-            // 6. 解析循环体
+            if (!isBooleanType(cond->dataType) && cond->dataType != D_UNKNOWN) {
+                error(0, "WHILE condition must be boolean.", previous().line);
+            }
+            emit("jz", cond->info, "", endLabel);
             expect(T_DO, 26);
-            node->add(parseStmt()); // 递归调用 parseStmt 解析循环体
-
-            // 7. 生成无条件跳转，回到循环开始处进行下一次判断
-            emit("j", "", "", startLabel);
-
-            // 8. 生成循环出口标签
-            emit("label", "", "", endLabel);
-
-            // 9. 循环解析完毕，将出口标签从栈中弹出
-            loopExitLabels.pop();
-
-        }
-        else if (match(T_BEGIN)) {
-            node->info = "Compound";
             node->add(parseStmt());
-            while (match(T_SEMICOLON)) {
+            emit("j", "", "", startLabel);
+            emit("label", "", "", endLabel);
+            loopExitLabels.pop();
+        } else if (match(T_BEGIN)) {
+            node->info = "Compound";
+            if (peek().type != T_END) {
                 node->add(parseStmt());
+                while (match(T_SEMICOLON)) {
+                    if (peek().type == T_END) break;
+                    node->add(parseStmt());
+                }
             }
             expect(T_END, 17);
-        }
-        else if (match(T_WRITE)) {
+        } else if (match(T_WRITE)) {
             node->info = "Write";
             expect(T_LPAREN, 34);
             do {
-                string t = parseExp()->info;
-                emit("write", "", "", t);
+                ASTNode* expr = parseExp();
+                emit("write", "", "", expr->info);
             } while (match(T_COMMA));
             expect(T_RPAREN, 34);
-        }
-        else if (match(T_EXIT)) {
-            node = new ASTNode("Stmt", "Exit");
+        } else if (match(T_EXIT)) {
+            node->info = "Exit";
             if (loopExitLabels.empty()) {
-                error(0, "EXIT statement not within a loop.");
-                //emit("halt", "", "", ""); 
+                error(0, "EXIT statement not within a loop.", previous().line);
             } else {
-                // 生成跳转指令，跳转到当前循环的出口标签
                 emit("j", "", "", loopExitLabels.top());
             }
+        } else if (match(T_READ)) {
+            node->info = "Read";
+            expect(T_LPAREN, 34);
+            do {
+                if (peek().type == T_IDENT) {
+                    Token tok = advance();
+                    SymbolInfo sym = getSymbolInfo(tok.value, tok.line);
+                    Designator dest = parseDesignator(tok.value, sym, tok.line);
+                    emit("read", "", "", dest.name);
+                } else {
+                    expect(T_IDENT, 4);
+                }
+            } while (match(T_COMMA));
+            expect(T_RPAREN, 34);
+        } else {
+            advance();
         }
-        
         return node;
     }
 
-    // 新增辅助函数：解析标识符引用（变量、数组、函数返回）
-    // IdentRef -> ident [ ‘[’Exp‘]’ { ‘[’Exp‘]’ } ]
-    // 这个函数处理变量名和可能的数组下标
-    string parseIdentRef(string name) {
-        string current_ref = name;
-        while (match(T_LBRACKET)) {
-            ASTNode* indexExpr = parseExp();
-            string temp_base = current_ref; // 保存当前的基地址/变量名
-            string temp_index = indexExpr->info; // 下标表达式的结果
-            string new_ref = newTemp(); // 新的临时变量存储地址或值
-            
-            // 生成计算数组元素地址的TAC
-            emit("array_access", temp_base, temp_index, new_ref);
-
-            current_ref = new_ref;
-            expect(T_RBRACKET, 22);
+    ASTNode* parseExp() {
+        ASTNode* left = parseSimpleExp();
+        if (isRelOp(peek().type)) {
+            TokenType opType = peek().type;
+            string op = peek().value;
+            advance();
+            ASTNode* right = parseSimpleExp();
+            if (!validRelational(opType, left->dataType, right->dataType)) {
+                error(0, "Relational operation requires compatible types (" +
+                             dataTypeName(left->dataType) + " vs " +
+                             dataTypeName(right->dataType) + ")",
+                      previous().line);
+            }
+            ASTNode* node = new ASTNode("RelOp", op);
+            node->add(left);
+            node->add(right);
+            string temp = newTemp();
+            emit(op, left->info, right->info, temp);
+            node->info = temp;
+            node->dataType = D_BOOLEAN;
+            return node;
         }
-        return current_ref;
+        return left;
     }
 
+    ASTNode* parseSimpleExp() {
+        ASTNode* node = parseTerm();
+        bool unaryMinus = false;
+        if (node->type == "UnaryPendingMinus") {
+            unaryMinus = true;
+        }
+        if (unaryMinus) {
+            if (!isNumericType(node->dataType) && node->dataType != D_UNKNOWN) {
+                error(0, "Unary minus requires numeric operand.", previous().line);
+            }
+            string temp = newTemp();
+            emit("uminus", node->info, "", temp);
+            node->info = temp;
+        }
+        while (isAddOp(peek().type)) {
+            TokenType opType = peek().type;
+            string op = peek().value;
+            advance();
+            ASTNode* right = parseTerm();
+            ASTNode* opNode = new ASTNode("BinOp", op);
+            opNode->add(node);
+            opNode->add(right);
+            if (opType == T_OR) {
+                if ((!isBooleanType(node->dataType) && node->dataType != D_UNKNOWN) ||
+                    (!isBooleanType(right->dataType) && right->dataType != D_UNKNOWN)) {
+                    error(0, "OR requires boolean operands.", previous().line);
+                }
+                opNode->dataType = D_BOOLEAN;
+                string temp = newTemp();
+                emit("or", node->info, right->info, temp);
+                opNode->info = temp;
+            } else {
+                if ((!isNumericType(node->dataType) && node->dataType != D_UNKNOWN) ||
+                    (!isNumericType(right->dataType) && right->dataType != D_UNKNOWN)) {
+                    error(0, "Arithmetic operation requires numeric operands.", previous().line);
+                }
+                opNode->dataType = combineNumericTypes(node->dataType, right->dataType);
+                string temp = newTemp();
+                emit(op, node->info, right->info, temp);
+                opNode->info = temp;
+            }
+            node = opNode;
+        }
+        return node;
+    }
 
-    // 新增的、完整的 parseFactor 函数
+    ASTNode* parseTerm() {
+        ASTNode* node = parseFactor();
+        while (isMulOp(peek().type)) {
+            TokenType opType = peek().type;
+            string op = peek().value;
+            advance();
+            ASTNode* right = parseFactor();
+            ASTNode* opNode = new ASTNode("BinOp", op);
+            opNode->add(node);
+            opNode->add(right);
+            if (opType == T_AND) {
+                if ((!isBooleanType(node->dataType) && node->dataType != D_UNKNOWN) ||
+                    (!isBooleanType(right->dataType) && right->dataType != D_UNKNOWN)) {
+                    error(0, "AND requires boolean operands.", previous().line);
+                }
+                opNode->dataType = D_BOOLEAN;
+                string temp = newTemp();
+                emit("and", node->info, right->info, temp);
+                opNode->info = temp;
+            } else if (opType == T_DIV || opType == T_MOD) {
+                if ((node->dataType != D_INTEGER && node->dataType != D_UNKNOWN) ||
+                    (right->dataType != D_INTEGER && right->dataType != D_UNKNOWN)) {
+                    error(0, "DIV/MOD require integer operands.", previous().line);
+                }
+                opNode->dataType = D_INTEGER;
+                string temp = newTemp();
+                emit(op, node->info, right->info, temp);
+                opNode->info = temp;
+            } else {
+                if ((!isNumericType(node->dataType) && node->dataType != D_UNKNOWN) ||
+                    (!isNumericType(right->dataType) && right->dataType != D_UNKNOWN)) {
+                    error(0, "Arithmetic operation requires numeric operands.", previous().line);
+                }
+                opNode->dataType = combineNumericTypes(node->dataType, right->dataType);
+                string temp = newTemp();
+                emit(op, node->info, right->info, temp);
+                opNode->info = temp;
+            }
+            node = opNode;
+        }
+        return node;
+    }
+
     ASTNode* parseFactor() {
         ASTNode* node = new ASTNode("Factor");
-        string place; // 用于存储此因子结果所在的临时变量或字面量
-
+        if (peek().type == T_PLUS || peek().type == T_MINUS) {
+            bool isMinus = match(T_MINUS);
+            if (!isMinus) advance();
+            ASTNode* factor = parseFactor();
+            if (isMinus) {
+                if (!isNumericType(factor->dataType) && factor->dataType != D_UNKNOWN) {
+                    error(0, "Unary minus requires numeric operand.", previous().line);
+                }
+                string temp = newTemp();
+                emit("uminus", factor->info, "", temp);
+                factor->info = temp;
+            }
+            return factor;
+        }
         switch (peek().type) {
             case T_IDENT: {
-                string name = peek().value;
-                advance(); // 消耗标识符
-
-                // 可能是函数调用，也可能是变量/数组
-                if (peek().type == T_LPAREN) { // 函数调用: ident ( ActParal )
-                    node->type = "FuncCall";
-                    node->info = name;
-                    
-                    advance(); // 消耗 '('
-                    
-                    vector<string> args;
+                Token identTok = advance();
+                string name = identTok.value;
+                if (peek().type == T_LPAREN) {
+                    vector<ASTNode*> args;
+                    advance();
                     if (peek().type != T_RPAREN) {
                         do {
-                            ASTNode* argExpr = parseExp();
-                            args.push_back(argExpr->info);
+                            args.push_back(parseExp());
                         } while (match(T_COMMA));
                     }
                     expect(T_RPAREN, 22);
-
-                    // 生成参数和调用的TAC
-                    for (const string& arg : args) {
-                        emit("param", "", "", arg);
-                    }
-                    place = newTemp();
-                    emit("call", name, to_string(args.size()), place);
-
-                } else { // 变量或数组引用: IdentRef
-                    node->type = "IdentRef";
-                    node->info = name;
-                    // 调用辅助函数处理可能的数组下标
-                    place = parseIdentRef(name);
+                    for (ASTNode* arg : args) emit("param", "", "", arg->info);
+                    string temp = newTemp();
+                    emit("call", name, to_string(args.size()), temp);
+                    node->info = temp;
+                    SymbolInfo* info = lookupSymbol(name);
+                    node->dataType = (info) ? info->valueType : D_UNKNOWN;
+                } else {
+                    SymbolInfo sym = getSymbolInfo(name, identTok.line);
+                    Designator designator = parseDesignator(name, sym, identTok.line);
+                    node->info = loadDesignatorValue(designator);
+                    node->dataType = designator.indices.empty() ?
+                        (sym.isArray ? D_UNKNOWN : sym.valueType) : sym.elementType;
                 }
                 break;
             }
-
-            case T_NUMBER:
-                place = peek().value;
-                node->info = place;
+            case T_NUMBER: {
+                string literal = peek().value;
+                node->info = literal;
+                node->dataType = (literal.find('.') != string::npos) ? D_REAL : D_INTEGER;
                 advance();
                 break;
-            
-            // [FIX 2] 增加字符串因子的处理 (支持 write('str'))
-            case T_STRING:
-                // 将字符串包装在单引号中，以便后端/解释器识别为字符串字面量
-                place = "'" + peek().value + "'";
-                node->info = place;
+            }
+            case T_STRING: {
+                node->info = "'" + peek().value + "'";
+                node->dataType = D_STRING;
                 advance();
                 break;
-
-            case T_LPAREN:
-                match(T_LPAREN);
-                node = parseExp(); // 递归调用 parseExp
-                place = node->info; // 结果就是内部表达式的结果
+            }
+            case T_LPAREN: {
+                advance();
+                node = parseExp();
                 expect(T_RPAREN, 22);
                 break;
-
-            case T_NOT:
-                match(T_NOT);
-                node = parseFactor(); // not Factor
-                place = newTemp();
-                emit("not", node->info, "", place);
-                break;
-                
-            case T_ODD:
-                match(T_ODD);
-                expect(T_LPAREN, 34);
-                node = parseExp(); // odd (SimpExp) - 我们用 parseExp 简化
-                place = newTemp();
-                emit("odd", node->info, "", place);
-                expect(T_RPAREN, 34);
-                break;
-
-            case T_TRUE:
-                place = "1"; // 通常用 1 代表 true
-                node->info = "true";
-                advance();
-                emit("=", "1", "", place); // 或者直接 t_x := 1
-                break;
-
-            case T_FALSE:
-                place = "0"; // 通常用 0 代表 false
-                node->info = "false";
-                advance();
-                emit("=", "0", "", place); // 或者直接 t_x := 0
-                break;
-            
-            case T_EXIT: {
-                node = new ASTNode("Stmt", "Exit");
-                advance(); // 消耗 'exit' token
-
-                // TAC Generation for exit
             }
-
-            default:
-                error(24, "Expression cannot start with this token: " + peek().value);
-                // 错误恢复：跳过一个token，尝试继续
+            case T_NOT: {
                 advance();
-                place = newTemp(); // 返回一个空临时变量
+                ASTNode* inner = parseFactor();
+                if ((!isBooleanType(inner->dataType) && inner->dataType != D_UNKNOWN)) {
+                    error(0, "NOT requires boolean operand.", previous().line);
+                }
+                string temp = newTemp();
+                emit("not", inner->info, "", temp);
+                node->info = temp;
+                node->dataType = D_BOOLEAN;
+                break;
+            }
+            case T_ODD: {
+                advance();
+                expect(T_LPAREN, 34);
+                ASTNode* expr = parseExp();
+                expect(T_RPAREN, 34);
+                string temp = newTemp();
+                emit("odd", expr->info, "", temp);
+                node->info = temp;
+                node->dataType = D_BOOLEAN;
+                break;
+            }
+            case T_TRUE: {
+                node->info = "1";
+                node->dataType = D_BOOLEAN;
+                advance();
+                break;
+            }
+            case T_FALSE: {
+                node->info = "0";
+                node->dataType = D_BOOLEAN;
+                advance();
+                break;
+            }
+            default:
+                error(24, "Expression cannot start with token: " + peek().value, peek().line);
+                advance();
+                node->info = newTemp();
                 break;
         }
-        
-        node->info = place; // 将结果的"名字"存入节点
         return node;
     }
-
-
-    // 替换旧的 parseTerm
-    ASTNode* parseTerm() {
-        ASTNode* node = new ASTNode("Term");
-        
-        ASTNode* left = parseFactor();
-        string place = left->info;
-        
-        // 处理乘法级运算符
-        while (peek().type == T_MUL || peek().type == T_SLASH || 
-            peek().type == T_DIV || peek().type == T_MOD ||
-            peek().type == T_AND) {
-            
-            string op = peek().value;
-            TokenType op_type = peek().type;
-            advance();
-            
-            // 创建一个二元操作节点（用于AST）
-            ASTNode* opNode = new ASTNode("BinOp", op);
-            opNode->add(left); // 左子节点是之前的因子
-
-            ASTNode* right = parseFactor();
-            opNode->add(right);
-            
-            // 生成TAC
-            string newPlace = newTemp();
-            emit(op, place, right->info, newPlace);
-            
-            place = newPlace; // 更新当前结果位置
-            left = opNode; // 更新AST的左侧，以处理 a*b*c 的情况
-        }
-        
-        node->add(left);
-        node->info = place;
-        return node;
-    }
-
-
-    // 同样，提供一个增强版的 parseExp 来协同工作
-    // Exp -> SimpExp [RelOp SimpExp]
-    // SimpExp -> [+|-] Term {AddOp Term}
-    ASTNode* parseExp() {
-        ASTNode* node = new ASTNode("Expression");
-
-        // 首先处理可能的 SimpExp 开头的 [+|-]
-        bool is_unary_minus = false;
-        if (peek().type == T_MINUS) {
-            is_unary_minus = true;
-            advance();
-        } else if (peek().type == T_PLUS) {
-            advance();
-        }
-
-        ASTNode* left = parseTerm();
-        string place = left->info;
-
-        // 如果有前导负号，生成TAC
-        if (is_unary_minus) {
-            string temp = newTemp();
-            emit("uminus", place, "", temp); // uminus: 一元负号
-            place = temp;
-        }
-        
-        // 处理加法级运算符
-        while (peek().type == T_PLUS || peek().type == T_MINUS || peek().type == T_OR) {
-            string op = peek().value;
-            advance();
-
-            ASTNode* opNode = new ASTNode("BinOp", op);
-            opNode->add(left);
-
-            ASTNode* right = parseTerm();
-            opNode->add(right);
-            
-            string newPlace = newTemp();
-            emit(op, place, right->info, newPlace);
-            
-            place = newPlace;
-            left = opNode;
-        }
-
-        // 处理关系运算符
-        if (peek().type == T_EQ || peek().type == T_NEQ || peek().type == T_LT ||
-            peek().type == T_LE || peek().type == T_GT || peek().type == T_GE) {
-            
-            string op = peek().value;
-            advance();
-
-            ASTNode* opNode = new ASTNode("RelOp", op);
-            opNode->add(left);
-
-            ASTNode* right = parseExp(); // 关系运算符右边可以是完整的 SimpExp
-            opNode->add(right);
-
-            string newPlace = newTemp();
-            
-            // 生成跳转指令，而不是直接计算布尔值（更高效）
-            // 这里为了简化，我们还是生成布尔值 0 或 1
-            // (j, op, arg1, arg2, label) 是更常见的做法
-            emit(op, place, right->info, newPlace);
-            
-            place = newPlace;
-            left = opNode;
-        }
-        
-        node->add(left);
-        node->info = place;
-        return node;
-    }
-
-
-    
-
-    // 获取数据以便输出
-    vector<Error> getErrors() { return errors; }
-    vector<Quadruple> getQuads() { return quads; }
 };
 
-
-// ==========================================
-// 5. JSON 输出与 主程序
-// ==========================================
 string escapeJsonString(const string& input) {
     stringstream ss;
     for (char c : input) {
         switch (c) {
-            case '"':  ss << "\\\""; break;
+            case '"': ss << "\\\""; break;
             case '\\': ss << "\\\\"; break;
-            case '\b': ss << "\\b";  break;
-            case '\f': ss << "\\f";  break;
-            case '\n': ss << "\\n";  break;
-            case '\r': ss << "\\r";  break;
-            case '\t': ss << "\\t";  break;
-            default:   ss << c;      break;
+            case '\b': ss << "\\b"; break;
+            case '\f': ss << "\\f"; break;
+            case '\n': ss << "\\n"; break;
+            case '\r': ss << "\\r"; break;
+            case '\t': ss << "\\t"; break;
+            default: ss << c; break;
         }
     }
     return ss.str();
 }
-string getCompilationResultAsJson(    const string& filename, 
-    const string& source,  // <--- 新增参数: 源代码
-    const vector<Token>& tokens, 
-    ASTNode* ast, 
-    const vector<Quadruple>& quads, 
-    const vector<Error>& errs) {
+
+string getCompilationResultAsJson(const string& filename,
+                                  const string& source,
+                                  const vector<Token>& tokens,
+                                  ASTNode* ast,
+                                  const vector<Quadruple>& quads,
+                                  const vector<Error>& errs) {
     stringstream ss;
     ss << "{\n";
-    
-    // 添加文件名信息
     ss << "  \"filename\": \"" << filename << "\",\n";
     ss << "  \"source\": \"" << escapeJsonString(source) << "\",\n";
-    // Tokens
     ss << "  \"tokens\": [\n";
-    for(size_t i=0; i<tokens.size(); ++i) {
-        ss << "    {\"id\": " << tokens[i].id << ", \"line\": " << tokens[i].line 
-            << ", \"type\": " << tokens[i].type << ", \"value\": \"" << tokens[i].value << "\"}" 
-            << (i < tokens.size()-1 ? "," : "") << "\n";
+    for (size_t i = 0; i < tokens.size(); ++i) {
+        ss << "    {\"id\": " << tokens[i].id << ", \"line\": " << tokens[i].line
+           << ", \"type\": " << tokens[i].type << ", \"value\": \"" << tokens[i].value << "\"}"
+           << (i + 1 < tokens.size() ? "," : "") << "\n";
     }
     ss << "  ],\n";
-
-    // Errors
     ss << "  \"errors\": [\n";
-    for(size_t i=0; i<errs.size(); ++i) {
-        ss << "    {\"code\": " << errs[i].code << ", \"line\": " << errs[i].line 
-            << ", \"msg\": \"" << errs[i].msg << "\"}" 
-            << (i < errs.size()-1 ? "," : "") << "\n";
+    for (size_t i = 0; i < errs.size(); ++i) {
+        ss << "    {\"code\": " << errs[i].code << ", \"line\": " << errs[i].line
+           << ", \"msg\": \"" << escapeJsonString(errs[i].msg) << "\"}"
+           << (i + 1 < errs.size() ? "," : "") << "\n";
     }
     ss << "  ],\n";
-
-    // TAC
     ss << "  \"tac\": [\n";
-    for(size_t i=0; i<quads.size(); ++i) {
-        ss << "    {\"id\": " << quads[i].id << ", \"op\": \"" << quads[i].op 
-            << "\", \"arg1\": \"" << quads[i].arg1 << "\", \"arg2\": \"" << quads[i].arg2 
-            << "\", \"result\": \"" << quads[i].result << "\"}" 
-            << (i < quads.size()-1 ? "," : "") << "\n";
+    for (size_t i = 0; i < quads.size(); ++i) {
+        ss << "    {\"id\": " << quads[i].id << ", \"op\": \"" << quads[i].op
+           << "\", \"arg1\": \"" << quads[i].arg1 << "\", \"arg2\": \"" << quads[i].arg2
+           << "\", \"result\": \"" << quads[i].result << "\"}"
+           << (i + 1 < quads.size() ? "," : "") << "\n";
     }
     ss << "  ],\n";
-
-    // AST
     ss << "  \"ast\": ";
     function<void(ASTNode*)> printNode = [&](ASTNode* node) {
         if (!node) { ss << "null"; return; }
-        ss << "{\"id\": " << node->id << ", \"type\": \"" << node->type << "\", \"info\": \"" << node->info << "\", \"children\": [";
-        for(size_t i=0; i<node->children.size(); ++i) {
+        ss << "{\"id\": " << node->id << ", \"type\": \"" << node->type
+           << "\", \"info\": \"" << escapeJsonString(node->info) << "\", \"children\": [";
+        for (size_t i = 0; i < node->children.size(); ++i) {
             printNode(node->children[i]);
-            if(i < node->children.size()-1) ss << ",";
+            if (i + 1 < node->children.size()) ss << ",";
         }
         ss << "]}";
     };
     printNode(ast);
     ss << "\n}";
-
     return ss.str();
 }
 
-
 int main(int argc, char* argv[]) {
     vector<string> filesToCompile;
-
     if (argc == 1) {
-        // 默认编译所有 test0.pl 到 test9.pl
-        for (int i = 0; i <= 9; i++) {
-            filesToCompile.push_back("test" + to_string(i) + ".pl");
-        }
+        for (int i = 0; i <= 9; i++) filesToCompile.push_back("test" + to_string(i) + ".pl");
     } else {
-        // 编译命令行指定的文件
-        for (int i = 1; i < argc; ++i) {
-            filesToCompile.push_back(argv[i]);
-        }
+        for (int i = 1; i < argc; ++i) filesToCompile.push_back(argv[i]);
     }
 
     ofstream outFile("output.json");
@@ -872,46 +1091,28 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    outFile << "{\n"; // JSON文件的开始
-
+    outFile << "{\n";
     for (size_t i = 0; i < filesToCompile.size(); ++i) {
         const string& filename = filesToCompile[i];
-        
         ifstream file(filename);
         if (!file.is_open()) {
             cerr << "Error: Cannot open " << filename << endl;
-            continue; // 跳过这个文件
+            continue;
         }
         cout << "Compiling " << filename << "..." << endl;
-        
         stringstream buffer;
         buffer << file.rdbuf();
         string source = buffer.str();
-
-        // 1. 词法分析
         Lexer lexer(source);
         lexer.scan();
-
-        // 2. 语法分析 & 中间代码生成
         Parser parser(lexer.tokens);
         parser.parse();
-
-        // 3. 获取该文件的JSON结果字符串
-        string resultJson = getCompilationResultAsJson(filename,source, lexer.tokens, parser.root, parser.getQuads(), parser.getErrors());
-
-        // 4. 将结果写入大的JSON对象
+        string resultJson = getCompilationResultAsJson(filename, source, lexer.tokens, parser.root, parser.getQuads(), parser.getErrors());
         outFile << "  \"" << filename << "\": " << resultJson;
-
-        // 如果不是最后一个文件，添加逗号
-        if (i < filesToCompile.size() - 1) {
-            outFile << ",\n";
-        }
+        if (i + 1 < filesToCompile.size()) outFile << ",\n";
     }
-
-    outFile << "\n}\n"; // JSON文件的结束
+    outFile << "\n}\n";
     outFile.close();
-
     cout << "Compilation finished. All results saved to output.json" << endl;
-
     return 0;
 }
